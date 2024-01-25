@@ -1,0 +1,192 @@
+#+TITLE: My Cool Typst
+#+AUTHOR: Me You
+#+EMAIL: test@test.de
+
+#+BIBLIOGRAPHY: ./test.bib
+#+print_bibliography: :title kjaslgkas
+#+CITE_EXPORT: typst apa
+
+#+INCLUDE: "./modus-theme/theme.typ" export typst
+
+#+TYPST: #set page(paper: "a4")
+
+#+BEGIN_EXPORT typst
+#set page(paper: "a4")
+#+END_EXPORT
+
+* Test
+
+Test Cool Wowee
+
+** Cool
+
+Here it comes
+
+#+CAPTION: look cool caption
+#+NAME: mycode
+#+BEGIN_SRC bash
+echo "hi"
+#+END_SRC
+
+** Inline
+
+So this should be inline now src_sh{echo "inline"}. Lets see if that
+works. Or maybe take a look at [[mycode]].
+
+
+* Woweee
+askjgasl
+sagjklasjglkasg
+
+- First
+- Second
+
+* List
+1. One
+2. Two
+   1. TwoPointOne
+   2. TwoPointTwo
+3. Three
+
+* Checkbox
+- [ ] One
+- [X] Two
+- [-] Other
+  - [ ] OtherOne
+  - [X] OtherTwo
+
+* Clock
+*** DONE [#A] Some task                                             :other: 
+CLOSED: [2020-12-07 Mo 02:26]
+- State "DONE"       from "TODO"       [2020-12-07 Mo 02:26]
+:LOGBOOK:
+CLOCK: [2020-09-03 Do 13:03]--[2020-09-03 Do 13:47] =>  0:44
+CLOCK: [2020-01-16 Do 10:44]--[2020-01-16 Do 16:26] =>  5:42
+:END:
+
+* Table
+
+#+CAPTION: hey caption
+| A |    B | C | D |  E |
+|---+------+---+---+----|
+| 1 |    2 | 3 | 4 |  5 |
+| 6 |    7 | 8 | 9 | 10 |
+
+---------
+
+* Fixed Width
+: akjslglkasglksagasjglkkkkkkkkkkkjkasglkjasjgklasjglkasjglkasjgkalsjgakslgjaslkgjaslkgjaklgajsklgjasgkl
+
+* Description
+- Elijah Wood :: He plays Frodo
+- Sean Astin :: He plays Sam, Frodo's friend.  I still remember him
+     very well from his role as Mikey Walsh in /The Goonies/.
+
+
+* Footnote
+- COOL REF [fn:A]
+- COOL INLINE [fn:: This is the inline definition of this footnote]
+- COOL ELSE [fn:ANYTHING: a definition]
+
+** Definitions
+[fn:A] Defined here
+
+* Cite
+Here is my cite [cite:@DUMMY:1]. But here is another cite with a
+different style [cite/ieee:@OTHER].
+
+* <<<Radio Target>>>
+
+Go to Radio Target for more information.
+
+And this should be a target element <<ABC>>.
+
+[[ABC][Should link to ABC now]].
+
+* Link
+
+Maybe found here [[http://google.com][Google]] :)
+
+* Properties
+:PROPERTIES:
+:NDisks_ALL: 1 2 3 4
+:Publisher_ALL: "Deutsche Grammophon" Philips EMI
+:END:
+
+* Clocktable
+#+NAME: myclocktable
+#+BEGIN: clocktable :maxlevel 3 :scope file :match "nicetag"
+#+CAPTION: Clock summary at [2023-07-10 Mo 02:29]
+| Headline             | Time   |      |      |
+|----------------------+--------+------+------|
+| *Total time*         | *3:54* |      |      |
+|----------------------+--------+------+------|
+| Clocktable           | 3:54   |      |      |
+| \_  Header one       |        | 2:34 |      |
+| \_  Another header   |        | 0:20 |      |
+| \_    Wow whats this |        |      | 0:10 |
+| \_  A task           |        | 1:00 |      |
+#+END:
+
+Does the link to the previous [[myclocktable][clocktable]].
+
+** Single
+:CLOCK: [2016-07-23 Sat 18:24]--[2016-07-23 Sat 19:38] =>  1:14
+
+** Header one                                                      :nicetag:
+:LOGBOOK:
+CLOCK: [2016-07-23 Sat 18:24]--[2016-07-23 Sat 19:38] =>  1:14
+CLOCK: [2016-07-23 Sat 12:23]--[2016-07-23 Sat 13:43] =>  1:20
+:END:
+** Another header                                                   :nicetag:
+:LOGBOOK:
+CLOCK: [2016-07-23 Sat 20:24]--[2016-07-23 Sat 20:34] =>  0:10
+:END:
+
+*** Wow whats this                                                :nicetag:
+:LOGBOOK:
+CLOCK: [2016-07-23 Sat 20:24]--[2016-07-23 Sat 20:34] =>  0:10
+:END:
+
+** A task                                                          :nicetag:
+:LOGBOOK:
+CLOCK: [2016-07-23 Sat 10:26]--[2016-07-23 Sat 11:26] =>  1:00
+:END:
+
+* Verse
+
+#+NAME: test
+#+BEGIN_VERSE
+jaksg  ksgj dkg dfg
+dgds
+g dfg d
+ g d
+ s fg
+ dsfgdsgdsfg kjdfgdfg
+ df g
+ dsdsfg
+ dsfg dsgds g
+#+END_VERSE
+
+* Figure
+
+#+NAME: black
+#+CAPTION: Wow look at this black rectangle
+#+CAPTION: Wow look at this black rectangle2
+ [[file:black.png]]
+
+* Special Block
+
+#+TODO: hi
+
+* This is a headline
+Still outside the drawer
+:DRAWERNAME:
+This is inside the drawer.
+:END:
+After the drawer.
+
+* Schedule
+** TODO Call Trillian for a date on New Years Eve.
+SCHEDULED: <2004-12-25 Sat>
+DEADLINE: <2004-02-29 Sun>

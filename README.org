@@ -1,0 +1,59 @@
+* ox-typst
+
+Org-mode to Typst exporter.
+
+** Install
+
+*** Manual
+
+#+BEGIN_SRC elisp
+(use-package ox-typst
+  :elpaca (:type git :host github :repo "jmpunkt/ox-typst"))
+#+END_SRC
+
+
+** Insert Typst Code
+
+Typst code can be directly used within org-mode by using the
+=#+TYPST:=. The provided string is not escaped by the exporter and is
+put directly into the output file.
+
+#+BEGIN_SRC org
+,#+TYPST: #set page(paper: "a4")
+#+END_SRC
+
+Alternatively use an export block.
+
+#+BEGIN_SRC org
+,#+BEGIN_EXPORT typst
+#set page(paper: "a4")
+,#+END_EXPORT
+#+END_SRC
+
+
+** Themes
+
+Use Typst rules to style alter the appearance. Include these rules at
+the top level of the document or above the target element. It might be
+useful to create a file containing Typst rules and include them like
+below.
+
+#+BEGIN_SRC org
+,#+INCLUDE: "./my-theme.typ" export typst
+#+END_SRC
+
+Alternatively, rules can be put into an export block ([[*Insert Typst Code][Insert Typst Code]]).
+
+** Cite
+
+Typst supports citing and bibliography by default.
+
+#+BEGIN_SRC org
+,#+BIBLIOGRAPHY: ./test.bib
+,#+print_bibliography: :title Custom Bibliography Title
+,#+CITE_EXPORT: typst apa
+#+END_SRC
+
+Supported styles are listed [[https://typst.app/docs/reference/meta/bibliography/][here]]. The second argument (in this case
+=apa=) is stringified and put into the =bibliography= function as the
+style argument (e.g. =bibliography("./test.bib", style: "apa")=).
