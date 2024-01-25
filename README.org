@@ -8,7 +8,7 @@ Org-mode to Typst exporter.
 
 #+BEGIN_SRC elisp
 (use-package ox-typst
-  :elpaca (:type git :host github :repo "jmpunkt/ox-typst"))
+  :after org)
 #+END_SRC
 
 
