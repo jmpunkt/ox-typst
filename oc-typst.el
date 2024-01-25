@@ -23,11 +23,7 @@
 
 ;;; Code:
 
-(require 'org-macs)
-(org-assert-version)
-
 (require 'oc)
-(require 'ox)
 
 ;;; Export capability
 (defun org-cite-typst-export-bibliography (keys files style properties backend com)

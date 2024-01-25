@@ -26,13 +26,9 @@
 ;;; Code:
 
 (require 'org-macs)
-(org-assert-version)
-
-(require 'cl-lib)
 (require 'ox)
-(require 'ox-publish)
+(require 'org-element)
 
-(require 'oc-typst)
 
 ;; Variables
 
@@ -500,7 +496,7 @@ The function should return the string to be exported."
 				                    log-buf nil)))
     outfile))
 
-;; Local variables:
-;; End:
+(require 'oc-typst)
 
+(provide 'ox-typst)
 ;;; ox-typst.el ends here
