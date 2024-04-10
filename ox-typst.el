@@ -373,18 +373,21 @@ The function should return the string to be exported."
 (defun org-typst-template (contents info)
   (let ((title (plist-get info :title))
         (author (when (plist-get info :with-author)
-			      (plist-get info :author)))
+			            (plist-get info :author)))
+        (language (plist-get info :language))
         (email (when (plist-get info :with-email)
-		         (plist-get info :email)))
+		             (plist-get info :email)))
         (toc (plist-get info :with-toc)))
     (concat
-     (or
-      (when author
-        (or (when email
-              (format "#set document(title: \"%s\", author: \"<%s> %s\")" (car title) (car author) email))
-            (format "#set document(title: \"%s\", author: \"%s\")" (car title) (car author))))
-      (format "#set document(title: \"%s\")" (car title)))
-     "\n"
+     "#set document("
+     (when (car title)
+       (format "title: \"%s\"" (car title)))
+     (when author
+       (or (when email
+             (format "#set document(title: \"%s\", author: \"<%s> %s\")" (car title) (car author) email))
+           (format "#set document(title: \"%s\", author: \"%s\")" (car title) (car author))))
+     ")\n"
+     (when language (format "#set text(lang: \"%s\")\n" language))
      (when toc "#outline()\n")
      contents)))
 
