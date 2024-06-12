@@ -379,14 +379,16 @@ The function should return the string to be exported."
 		             (plist-get info :email)))
         (toc (plist-get info :with-toc)))
     (concat
-     "#set document("
-     (when (car title)
-       (format "title: \"%s\"" (car title)))
-     (when author
-       (or (when email
-             (format "#set document(title: \"%s\", author: \"<%s> %s\")" (car title) (car author) email))
-           (format "#set document(title: \"%s\", author: \"%s\")" (car title) (car author))))
-     ")\n"
+     (when (or (car title) author)
+       (concat
+        "#set document("
+        (when (car title)
+          (format "title: \"%s\"" (car title)))
+        (when author
+          (or (when email
+                (format "#set document(title: \"%s\", author: \"<%s> %s\")" (car title) (car author) email))
+              (format "#set document(title: \"%s\", author: \"%s\")" (car title) (car author))))
+        ")\n"))
      (when language (format "#set text(lang: \"%s\")\n" language))
      (when toc "#outline()\n")
      contents)))
