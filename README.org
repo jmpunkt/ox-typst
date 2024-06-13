@@ -11,6 +11,10 @@ Org-mode to Typst exporter.
   :after org)
 #+END_SRC
 
+** Usage
+
+If you use =org-export-dispatch=, then the Typst exporter is
+available with the =y= prefix.
 
 ** Insert Typst Code
 
@@ -33,10 +37,10 @@ Alternatively use an export block.
 
 ** Themes
 
-Use Typst rules to style alter the appearance. Include these rules at
-the top level of the document or above the target element. It might be
-useful to create a file containing Typst rules and include them like
-below.
+Use Typst rules to change the appearance of your document. Include
+these rules at the top level of the document or above the target
+element. It might be useful to create a file containing Typst rules
+and include them like below.
 
 #+BEGIN_SRC org
 ,#+INCLUDE: "./my-theme.typ" export typst
@@ -54,6 +58,18 @@ Typst supports citing and bibliography by default.
 ,#+CITE_EXPORT: typst apa
 #+END_SRC
 
-Supported styles are listed [[https://typst.app/docs/reference/meta/bibliography/][here]]. The second argument (in this case
+Supported styles are listed [[https://typst.app/docs/reference/model/bibliography/][here]]. The second argument (in this case
 =apa=) is stringified and put into the =bibliography= function as the
-style argument (e.g. =bibliography("./test.bib", style: "apa")=).
+style argument (like =bibliography("./test.bib", style: "apa")=).
+
+** Examples
+
+Take a look at =test/test.org= to get an idea how to use the different
+org-mode statements with Typst. For real examples look in the
+=examples= folder.
+
+*** Writing a Letter
+
+If you want to write a letter using a third party package
+(e.g. https://github.com/Sematre/typst-letter-pro), then take a look
+at =examples/letter.org=.
