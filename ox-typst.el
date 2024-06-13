@@ -270,7 +270,34 @@ The function should return the string to be exported."
 		            (and (string-match "\\<[0-9]+\\>" value)
 			               (+ (string-to-number (match-string 0 value)) level))))
 	        (if (and localp parent)
-              (message "// todo: implement local toc")
+              (format "#context {
+  let before = query(
+    selector(heading).before(here(), inclusive: true),
+  )
+  let elm = before.pop()
+  let after_elements = query(
+    heading.where(outlined: true).after(here(), inclusive: true),
+  )
+  let next_maybe = after_elements.find(it => it.level <= elm.level)
+  let next = if next_maybe == none {
+    after_elements.pop()
+  } else {
+    next_maybe
+  }
+  outline(
+    title: none,
+    depth: %s,
+    target: heading.where(outlined: true).after(
+      elm.location(),
+      inclusive: false,
+    ).and(
+      heading.where(outlined: true).before(
+        next.location(),
+        inclusive: next_maybe == none,
+      ),
+    ),
+  )
+}" (if depth depth "none"))
             (if depth
                 (format "#outline(title: none, depth: %s)" depth)
               "#outline(title: none)"))))

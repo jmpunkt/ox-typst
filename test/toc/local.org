@@ -14,5 +14,14 @@ Expecting a TOC with the entries B11, B111, B12, B121, B13, B131.
 *** B13
 **** B131
 * B2
+** B1
+#+TOC: headlines 1 local
+Expecting a TOC with the entries B21, B22, B23.
+*** B21
+**** B211
+*** B22
+**** B221
+*** B23
+**** B231
 
 * C
