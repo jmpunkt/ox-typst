@@ -1,4 +1,6 @@
-/test/test.typ
-/examples/*.typ
+/test/**/*.typ
+/test/**/*.pdf
+/examples/**/*.typ
+/examples/**/*.pdf
 *.pdf
 *.html

@@ -210,7 +210,9 @@ The function should return the string to be exported."
               (title (if (stringp title-raw)
                          (org-typst--escape '("#") title-raw)
                        (org-export-data title-raw info))))
-    (concat (org-typst--sections level) " " title "\n" contents)))
+    (if (string-equal (org-element-property :UNNUMBERED headline) "notoc")
+        (format "#heading(level: %s, outlined: false)[%s]\n%s" level title contents)
+      (concat (org-typst--sections level) " " title "\n" contents))))
 
 (defun org-typst-horizontal-rule (_horizontal-rule _contents _info)
   ""
@@ -251,9 +253,30 @@ The function should return the string to be exported."
                       (format "terms.item[%s][%s]," tag trimmed)))
       (_ nil))))
 
-(defun org-typst-keyword (keyword _contents _info)
-  (when (string-equal (org-element-property :key keyword) "TYPST")
-    (org-element-property :value keyword)))
+(defun org-typst-keyword (keyword _contents info)
+  (let ((key (org-element-property :key keyword))
+        (value (org-element-property :value keyword)))
+    (cond
+     ((string-equal key "TYPST") value)
+     ((string-equal key "TYP") value)
+     ((string-equal key "TOC")
+      (cond
+	     ((string-match-p "\\<headlines\\>" value)
+	      (let* ((localp (string-match-p "\\<local\\>" value))
+		           (parent (org-element-lineage keyword 'headline))
+		           (level (if (not (and localp parent)) 0
+			                  (org-export-get-relative-level parent info)))
+		           (depth
+		            (and (string-match "\\<[0-9]+\\>" value)
+			               (+ (string-to-number (match-string 0 value)) level))))
+	        (if (and localp parent)
+              (message "// todo: implement local toc")
+            (if depth
+                (format "#outline(title: none, depth: %s)" depth)
+              "#outline(title: none)"))))
+       ((string-match-p "\\<figures\\>" value) "#outline(title: none, target: figure.where(kind: image))")
+	     ((string-match-p "\\<tables\\>" value) "#outline(title: none, target: figure.where(kind: table))")
+	     ((string-match-p "\\<listings\\>" value) "#outline(title: none, target: figure.where(kind: raw))"))))))
 
 (defun org-typst-line-break (_line-break _contents _info)
   ""

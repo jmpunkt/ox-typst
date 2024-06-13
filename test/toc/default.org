@@ -1,0 +1,26 @@
+#+OPTIONS: toc:nil
+
+#+TOC: headlines
+
+* A
+** A1
+#+CAPTION[Example table]: This is an example table.
+| Name  | Phone | Age |
+|-------+-------+-----|
+| Peter |  1234 |  17 |
+| Anna  |  4321 |  25 |
+
+*** A11
+This should include all levels.
+* B
+#+TYPST: #figure(circle(radius: 50pt), caption: [Large circle])
+* C
+#+CAPTION[Example code]: This is example code.
+#+BEGIN_SRC lisp
+  (message "hi")
+#+END_SRC
+
+* TOC
+#+TOC: figures
+#+TOC: tables
+#+TOC: listings

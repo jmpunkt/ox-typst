@@ -1,0 +1,18 @@
+#+OPTIONS: toc:nil
+
+* A
+** A1
+*** A11
+* B
+** B1
+#+TOC: headlines 2 local
+Expecting a TOC with the entries B11, B111, B12, B121, B13, B131.
+*** B11
+**** B111
+*** B12
+**** B121
+*** B13
+**** B131
+* B2
+
+* C
