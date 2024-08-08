@@ -432,8 +432,7 @@ The function should return the string to be exported."
      (when (or (car title) author)
        (concat
         "#set document("
-        (when (car title)
-          (format "title: \"%s\"" (car title)))
+        (format "title: \"%s\"" (or (car title) ""))
         (when author
           (or (when email
                 (format "#set document(title: \"%s\", author: \"<%s> %s\")" (car title) (car author) email))
