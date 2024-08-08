@@ -435,8 +435,8 @@ The function should return the string to be exported."
         (format "title: \"%s\"" (or (car title) ""))
         (when author
           (or (when email
-                (format "#set document(title: \"%s\", author: \"<%s> %s\")" (car title) (car author) email))
-              (format "#set document(title: \"%s\", author: \"%s\")" (car title) (car author))))
+                (format ", author: \"<%s> %s\"" (car author) email))
+              (format ", author: \"%s\"" (car author))))
         ")\n"))
      (when language (format "#set text(lang: \"%s\")\n" language))
      (when toc "#outline()\n")
