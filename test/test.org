@@ -65,14 +65,21 @@ CLOCK: [2020-01-16 Do 10:44]--[2020-01-16 Do 16:26] =>  5:42
 :END:
 
 * Table
-
+** First
 #+CAPTION: hey caption
-| A |    B | C | D |  E |
-|---+------+---+---+----|
-| 1 |    2 | 3 | 4 |  5 |
-| 6 |    7 | 8 | 9 | 10 |
+| A | B | C | D |  E |
+|---+---+---+---+----|
+| 1 | 2 | 3 | 4 |  5 |
+| 6 | 7 | 8 | 9 | 10 |
 
----------
+** Second
+=The following table contains verbatim content=
+
+#+CAPTION: special table
+| #A | =Verbatim= |
+|----+------------|
+|  1 |          2 |
+|  6 |          7 |
 
 * Fixed Width
 : akjslglkasglksagasjglkkkkkkkkkkkjkasglkjasjgklasjglkasjglkasjgkalsjgakslgjaslkgjaslkgjaklgajsklgjasgkl

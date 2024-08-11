@@ -452,8 +452,9 @@ The function should return the string to be exported."
 (defun org-typst-underline (_underline contents _info)
   (format "#underline[%s]" contents))
 
-(defun org-typst-verbatim (verbatim contents info)
-  (org-typst--raw contents nil nil verbatim info))
+(defun org-typst-verbatim (verbatim _contents _info)
+  (format "#raw(%s)"
+          (org-typst--as-string (org-element-property :value verbatim))))
 
 (defun org-typst-verse-block (verse-block contents info)
   (org-typst--raw contents nil 1 verse-block info))
