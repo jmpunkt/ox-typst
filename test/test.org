@@ -18,6 +18,11 @@
 
 Test Cool Wowee
 
+* #1 Heading
+
+I wonder if this is correct #1.
+
+
 ** Cool
 
 Here it comes
@@ -25,7 +30,8 @@ Here it comes
 #+CAPTION: look cool caption
 #+NAME: mycode
 #+BEGIN_SRC bash
-echo "hi"
+  # print hi to console
+  echo "hi"
 #+END_SRC
 
 ** Inline
@@ -38,8 +44,8 @@ works. Or maybe take a look at [[mycode]].
 askjgasl
 sagjklasjglkasg
 
-- First
-- Second
+- First or #1
+- Second or #2
 
 * List
 1. One
@@ -94,6 +100,7 @@ CLOCK: [2020-01-16 Do 10:44]--[2020-01-16 Do 16:26] =>  5:42
 - COOL REF [fn:A]
 - COOL INLINE [fn:: This is the inline definition of this footnote]
 - COOL ELSE [fn:ANYTHING: a definition]
+- COOL TEST [fn:ANYTHING: a definition with #1]
 
 ** Definitions
 [fn:A] Defined here
