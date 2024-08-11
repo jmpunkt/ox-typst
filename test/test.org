@@ -3,7 +3,7 @@
 #+EMAIL: test@test.de
 
 #+BIBLIOGRAPHY: ./test.bib
-#+print_bibliography: :title kjaslgkas
+#+print_bibliography: :title "Custom Ttitle For The Bibliography"
 #+CITE_EXPORT: typst apa
 
 #+INCLUDE: "./modus-theme/theme.typ" export typst
@@ -14,20 +14,18 @@
 #set page(paper: "a4")
 #+END_EXPORT
 
-* Test
-
-Test Cool Wowee
-
 * #1 Heading
 
-I wonder if this is correct #1.
+I wonder if this is correct #1. We have to ensure that the character #" is
+escaped correctly. Currently the character is escaped using the Unicode
+escape. If we do not escape the character, then one could write raw Typst
+statements. The resulting code would not compile properly.
 
+* Code
 
-** Cool
+Here is how we define present code.
 
-Here it comes
-
-#+CAPTION: look cool caption
+#+CAPTION: Example Bash code.
 #+NAME: mycode
 #+BEGIN_SRC bash
   # print hi to console
@@ -39,29 +37,40 @@ Here it comes
 So this should be inline now src_sh{echo "inline"}. Lets see if that
 works. Or maybe take a look at [[mycode]].
 
-
-* Woweee
-askjgasl
-sagjklasjglkasg
-
-- First or #1
-- Second or #2
-
 * List
+
+** Plain
+- One
+- Two
+  - TwoPointOne
+  - TwoPointTwo
+- Three
+
+** Enumerated
 1. One
 2. Two
    1. TwoPointOne
    2. TwoPointTwo
 3. Three
 
-* Checkbox
+** Checkbox
 - [ ] One
 - [X] Two
 - [-] Other
   - [ ] OtherOne
   - [X] OtherTwo
 
+** Description
+
+- Elijah Wood :: He plays Frodo
+- Sean Astin :: He plays Sam, Frodo's friend.  I still remember him very well
+  from his role as Mikey Walsh in /The Goonies/.
+
 * Clock
+
+Here we have an example task with time information. Lets see how this is
+represented in Typst.
+
 *** DONE [#A] Some task                                             :other: 
 CLOSED: [2020-12-07 Mo 02:26]
 - State "DONE"       from "TODO"       [2020-12-07 Mo 02:26]
@@ -71,6 +80,7 @@ CLOCK: [2020-01-16 Do 10:44]--[2020-01-16 Do 16:26] =>  5:42
 :END:
 
 * Table
+
 ** First
 #+CAPTION: hey caption
 | A | B | C | D |  E |
@@ -79,6 +89,7 @@ CLOCK: [2020-01-16 Do 10:44]--[2020-01-16 Do 16:26] =>  5:42
 | 6 | 7 | 8 | 9 | 10 |
 
 ** Second
+
 =The following table contains verbatim content=
 
 #+CAPTION: special table
@@ -88,7 +99,7 @@ CLOCK: [2020-01-16 Do 10:44]--[2020-01-16 Do 16:26] =>  5:42
 |  6 |          7 |
 
 * Fixed Width
-: akjslglkasglksagasjglkkkkkkkkkkkjkasglkjasjgklasjglkasjglkasjgkalsjgakslgjaslkgjaslkgjaklgajsklgjasgkl
+: This text section uses a ficed-width font.
 
 * Math
 
@@ -106,7 +117,9 @@ x=\sqrt{b}                              % even tables, figures, etc
 \end{equation}
 
 
-$a^2=b$ \( a + b \) \[ a=-2 \].
+This is inline Math: $a^2=b$. The following two statements are not inlined.
+
+\( a + b \) \[ a=-2 \]
 
 ** Alternative
 
@@ -125,26 +138,22 @@ Escaping the dollar symbol is also recommended:
 And here is some \$ dollar symbol.
 
 
-* Description
-- Elijah Wood :: He plays Frodo
-- Sean Astin :: He plays Sam, Frodo's friend.  I still remember him
-     very well from his role as Mikey Walsh in /The Goonies/.
+* Labels
 
-
-* Footnote
-- COOL REF [fn:A]
+** Footnote
+- Lets reference our definition [fn:A]
 - COOL INLINE [fn:: This is the inline definition of this footnote]
 - COOL ELSE [fn:ANYTHING: a definition]
 - COOL TEST [fn:ANYTHING: a definition with #1]
 
-** Definitions
-[fn:A] Defined here
+*** Definitions
+[fn:A] Let =A= be defined here.
 
-* Cite
+** Cite
 Here is my cite [cite:@DUMMY:1]. But here is another cite with a
 different style [cite/ieee:@OTHER].
 
-* <<<Radio Target>>>
+** <<<Radio Target>>>
 
 Go to Radio Target for more information.
 
@@ -152,7 +161,7 @@ And this should be a target element <<ABC>>.
 
 [[ABC][Should link to ABC now]].
 
-* Link
+** Link
 
 Maybe found here [[http://google.com][Google]] :)
 
@@ -204,6 +213,8 @@ CLOCK: [2016-07-23 Sat 10:26]--[2016-07-23 Sat 11:26] =>  1:00
 
 * Verse
 
+Here we produce a non formatted and whites pace preserving block.
+
 #+NAME: test
 #+BEGIN_VERSE
 jaksg  ksgj dkg dfg
@@ -219,9 +230,11 @@ g dfg d
 
 * Figure
 
+Now lets insert a black rectangle.
+
 #+NAME: black
-#+CAPTION: Wow look at this black rectangle
-#+CAPTION: Wow look at this black rectangle2
+#+CAPTION: Wow look at this black rectangle.
+#+CAPTION: This is another caption for the same black rectangle.
  [[file:black.png]]
 
 * Special Block
