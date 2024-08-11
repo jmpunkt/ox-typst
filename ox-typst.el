@@ -247,7 +247,7 @@ The function should return the string to be exported."
 (defun org-typst-italic (_italic contents _info)
   (format "#emph[%s]" contents))
 
-(defun org-typst-item (item contents _info)
+(defun org-typst-item (item contents info)
   (when-let ((parent (org-export-get-parent item))
              (trimmed (org-trim contents)))
     (pcase (org-element-property :type parent)
@@ -256,7 +256,8 @@ The function should return the string to be exported."
       ('ordered (when-let ((bullet-raw (org-element-property :bullet item)))
                   (when (string-match "\\([0-9]+\\)\." bullet-raw)
                     (format "enum.item(%s)[%s]," (match-string 1 bullet-raw) trimmed))))
-      ('descriptive (when-let ((tag  (car (org-element-property :tag item))))
+      ('descriptive (when-let* ((raw-tag (org-element-property :tag item))
+                                (tag (and raw-tag (org-export-data raw-tag info))))
                       (format "terms.item[%s][%s]," tag trimmed)))
       (_ nil))))
 
