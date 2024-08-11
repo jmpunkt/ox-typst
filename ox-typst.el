@@ -89,6 +89,13 @@ The function should return the string to be exported."
   :group 'org-export-typst
   :type 'function)
 
+(defcustom org-typst-latex-fragment-behavior nil
+  "Determines how to process LaTeX fragments."
+  :type '(choice (const :tag "No processing" nil)
+                 ;; TODO: how to implement translation of LaTeX fragments to Typst?
+                 (const :tag "Translate" translate))
+  :group 'org-typst-export)
+
 ;; Export
 (org-export-define-backend 'typst
   '((bold . org-typst-bold)
@@ -111,6 +118,8 @@ The function should return the string to be exported."
     (italic . org-typst-italic)
     (item . org-typst-item)
     (keyword . org-typst-keyword)
+    (latex-environment . org-typst-latex-environment)
+    (latex-fragment . org-typst-latex-fragment)
     (line-break . org-typst-line-break)
     (link . org-typst-link)
     (node-property . org-typst-node-property)
@@ -136,9 +145,7 @@ The function should return the string to be exported."
     (timestamp . org-typst-timestamp)
     (underline . org-typst-underline)
     (verbatim . org-typst-verbatim)
-    (verse-block . org-typst-verse-block)
-    ;; Pseudo objects and elements.
-    (typst-math-block . org-typst-math-block))
+    (verse-block . org-typst-verse-block))
   :menu-entry
   '(?y "Export to Typst"
        ((?F "As Typst buffer" org-typst-export-to-typst)
@@ -379,7 +386,6 @@ The function should return the string to be exported."
   contents)
 
 (defun org-typst-special-block (_special-block contents _info)
-  (message "special-block")
   contents)
 
 (defun org-typst-src-block (src-block _contents info)
@@ -459,8 +465,20 @@ The function should return the string to be exported."
 (defun org-typst-verse-block (verse-block contents info)
   (org-typst--raw contents nil 1 verse-block info))
 
-(defun org-typst-math-block (_math-block contents _info)
-  (format "$ %s $" contents))
+(defun org-typst-latex-environment (_latex-environment _contents _info)
+  (message "// todo: org-typst-latex-environment"))
+
+(defun org-typst-latex-fragment (latex-fragment _contents _info)
+  (cond
+   ((eq org-typst-latex-fragment-behavior nil)
+    (let ((fragment (org-element-property :value latex-fragment)))
+      (cond
+       ((string-match-p "^[ \t]*\$.*\$[ \t]*$" fragment) fragment)
+       ((string-match-p "^[ \t]*\\\\(.*\\\\)[ \t]*$" fragment)
+        (replace-regexp-in-string "\\\\)[ \t]*$" "$" (replace-regexp-in-string "^[ \t]*\\\\(" "$" fragment)))
+       ((string-match-p "^[ \t]*\\\\\\[.*\\\\\\][ \t]*$" fragment)
+        (replace-regexp-in-string "\\\\\\][ \t]*$" "$" (replace-regexp-in-string "^[ \t]*\\\\\\[" "$" fragment))))))
+   ((eq org-typst-latex-fragment-behavior 'translate) (message "// todo: latex-fragment-translate"))))
 
 ;; Helper
 

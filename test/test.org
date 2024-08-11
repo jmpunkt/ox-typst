@@ -90,6 +90,41 @@ CLOCK: [2020-01-16 Do 10:44]--[2020-01-16 Do 16:26] =>  5:42
 * Fixed Width
 : akjslglkasglksagasjglkkkkkkkkkkkjkasglkjasjgklasjglkasjglkasjgkalsjgakslgjaslkgjaslkgjaklgajsklgjasgkl
 
+* Math
+
+Here is a LaTeX snippets from the manual. However, these are not exported. It is
+currently not possible for us to translate these elements into Typst code. Mabye
+use on of the following projects for that:
+
+- https://github.com/msakuta/latypst :: Translate LaTeX snippets to roughly equivalent Typst snippets
+- https://github.com/mitex-rs/mitex :: Emulate LaTeX inside Typst
+
+** Example
+
+\begin{equation}                        % arbitrary environments,
+x=\sqrt{b}                              % even tables, figures, etc
+\end{equation}
+
+
+$a^2=b$ \( a + b \) \[ a=-2 \].
+
+** Alternative
+
+Currently Typst Math is not recoginized. It is possible to write Typst math directly in Org.
+
+$ 1 * 1 $
+
+To be safe that this behavior does not break in the future, one should use an export block.
+
+#+BEGIN_EXPORT typst
+$ 1 * 1 $
+#+END_EXPORT
+
+Escaping the dollar symbol is also recommended:
+
+And here is some \$ dollar symbol.
+
+
 * Description
 - Elijah Wood :: He plays Frodo
 - Sean Astin :: He plays Sam, Frodo's friend.  I still remember him
