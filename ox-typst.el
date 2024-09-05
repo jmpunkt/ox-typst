@@ -50,7 +50,7 @@ Changing the properties results in a appearance change of all
 checkboxes that kind across the document."
   :type '(alist :key-type (symbol :tag "Kind of checkbox")
                 :value-type (string :tag "Typst representation of that checkbox"))
-  :group 'org-typst-export)
+  :group 'org-export-typst)
 
 (defcustom org-typst-language-mapping '(("elisp" . "lisp"))
   "Maps language tag from Org-Mode to another.
@@ -58,7 +58,7 @@ checkboxes that kind across the document."
 Typst might not understand the language tag provided by
 Org-Mode.  Instead map the tag to an alternative tag."
   :type (list 'string)
-  :group 'org-typst-export)
+  :group 'org-export-typst)
 
 (defcustom org-typst-format-drawer-function (lambda (_ contents) contents)
   "Function called to format a drawer in LaTeX code.
@@ -70,8 +70,8 @@ The function must accept two parameters:
 The function should return the string to be exported.
 
 The default function simply returns the value of CONTENTS."
-  :group 'org-export-typst
-  :type 'function)
+  :type 'function
+  :group 'org-export-typst)
 
 (defcustom org-typst-format-inlinetask-function (lambda (_ contents) contents)
   "Function called to format an inlinetask in LaTeX code.
@@ -86,15 +86,15 @@ The function must accept seven parameters:
   INFO      the export options (plist)
 
 The function should return the string to be exported."
-  :group 'org-export-typst
-  :type 'function)
+  :type 'function
+  :group 'org-export-typst)
 
 (defcustom org-typst-latex-fragment-behavior nil
   "Determines how to process LaTeX fragments."
   :type '(choice (const :tag "No processing" nil)
                  ;; TODO: how to implement translation of LaTeX fragments to Typst?
                  (const :tag "Translate" translate))
-  :group 'org-typst-export)
+  :group 'org-export-typst)
 
 ;; Export
 (org-export-define-backend 'typst
@@ -395,7 +395,7 @@ The function should return the string to be exported."
     (when (org-string-nw-p code)
       (org-typst--raw code lang 1 src-block info))))
 
-(defun org-typst-statistics-cookie (statistics-cookie _contents _info))
+(defun org-typst-statistics-cookie (_statistics-cookie _contents _info))
 
 (defun org-typst-strike-through (_strike-through contents _info)
   (format "#strike[%s]" contents))
@@ -482,7 +482,6 @@ The function should return the string to be exported."
    ((eq org-typst-latex-fragment-behavior 'translate) (message "// todo: latex-fragment-translate"))))
 
 ;; Helper
-
 (defun org-typst--raw (content language block element info)
   (when content
     (org-typst--figure
