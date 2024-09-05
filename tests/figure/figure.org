@@ -1,0 +1,8 @@
+* Figure
+
+Now lets insert a black rectangle.
+
+#+NAME: black
+#+CAPTION: Wow look at this black rectangle.
+#+CAPTION: This is another caption for the same black rectangle.
+ [[file:./black.png]]

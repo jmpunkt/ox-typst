@@ -1,0 +1,38 @@
+* Clocktable
+
+#+BEGIN: clocktable :maxlevel 3 :scope file :match "nicetag"
+#+CAPTION: Clock summary at [2023-07-10 Mo 02:29]
+| Headline             | Time   |      |      |
+|----------------------+--------+------+------|
+| *Total time*         | *3:54* |      |      |
+|----------------------+--------+------+------|
+| Clocktable           | 3:54   |      |      |
+| \_  Header one       |        | 2:34 |      |
+| \_  Another header   |        | 0:20 |      |
+| \_    Wow whats this |        |      | 0:10 |
+| \_  A task           |        | 1:00 |      |
+#+END:
+
+** Single
+:CLOCK: [2016-07-23 Sat 18:24]--[2016-07-23 Sat 19:38] =>  1:14
+
+** Header one                                                      :nicetag:
+:LOGBOOK:
+CLOCK: [2016-07-23 Sat 18:24]--[2016-07-23 Sat 19:38] =>  1:14
+CLOCK: [2016-07-23 Sat 12:23]--[2016-07-23 Sat 13:43] =>  1:20
+:END:
+** Another header                                                   :nicetag:
+:LOGBOOK:
+CLOCK: [2016-07-23 Sat 20:24]--[2016-07-23 Sat 20:34] =>  0:10
+:END:
+
+*** Wow whats this                                                :nicetag:
+:LOGBOOK:
+CLOCK: [2016-07-23 Sat 20:24]--[2016-07-23 Sat 20:34] =>  0:10
+:END:
+
+** A task                                                          :nicetag:
+:LOGBOOK:
+CLOCK: [2016-07-23 Sat 10:26]--[2016-07-23 Sat 11:26] =>  1:00
+:END:
+

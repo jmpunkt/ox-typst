@@ -1,0 +1,4 @@
+* Schedule
+** TODO Call Trillian for a date on New Years Eve.
+SCHEDULED: <2004-12-25 Sat>
+DEADLINE: <2004-02-29 Sun>

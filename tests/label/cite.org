@@ -1,0 +1,8 @@
+#+BIBLIOGRAPHY: ./test.bib
+#+print_bibliography: :title "Custom Ttitle For The Bibliography"
+#+CITE_EXPORT: typst apa
+
+* Cite
+
+Here is my cite [cite:@DUMMY:1]. But here is another cite with a
+different style [cite/ieee:@OTHER].

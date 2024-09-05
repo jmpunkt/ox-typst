@@ -1,0 +1,6 @@
+#+TITLE: My Cool Typst
+#+AUTHOR: Me You
+#+EMAIL: test@test.de
+
+* Section
+This should include meta information.

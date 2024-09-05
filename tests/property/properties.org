@@ -1,0 +1,5 @@
+* Properties
+:PROPERTIES:
+:NDisks_ALL: 1 2 3 4
+:Publisher_ALL: "Deutsche Grammophon" Philips EMI
+:END:

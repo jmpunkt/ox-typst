@@ -1,0 +1,10 @@
+* Drawer
+
+Still outside the drawer
+
+:DRAWERNAME:
+This is inside the drawer.
+:END:
+
+After the drawer.
+

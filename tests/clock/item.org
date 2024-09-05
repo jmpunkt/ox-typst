@@ -1,0 +1,12 @@
+* Clock
+
+Here we have an example task with time information. Lets see how this is
+represented in Typst.
+
+*** DONE [#A] Some task                                             :other:
+CLOSED: [2020-12-07 Mo 02:26]
+- State "DONE"       from "TODO"       [2020-12-07 Mo 02:26]
+:LOGBOOK:
+CLOCK: [2020-09-03 Do 13:03]--[2020-09-03 Do 13:47] =>  0:44
+CLOCK: [2020-01-16 Do 10:44]--[2020-01-16 Do 16:26] =>  5:42
+:END:

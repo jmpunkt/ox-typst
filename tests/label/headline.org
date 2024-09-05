@@ -1,0 +1,4 @@
+* Headline Name
+
+This link matches the headline name exactly [[*Headline Name]].
+

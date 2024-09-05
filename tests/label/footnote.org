@@ -1,0 +1,8 @@
+* Footnote
+- Lets reference our definition [fn:A]
+- COOL INLINE [fn:: This is the inline definition of this footnote]
+- COOL ELSE [fn:ANYTHING: a definition]
+- COOL TEST [fn:ANYTHING: a definition with #1]
+
+** Definitions
+[fn:A] Let =A= be defined here.

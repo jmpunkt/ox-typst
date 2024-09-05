@@ -1,0 +1,4 @@
+#+BEGIN_EXPORT typst
+#set page(paper: "a4")
+#+END_EXPORT
+

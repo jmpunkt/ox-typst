@@ -1,0 +1,6 @@
+* Checkbox
+- [ ] One
+- [X] Two
+- [-] Other
+  - [ ] OtherOne
+  - [X] OtherTwo

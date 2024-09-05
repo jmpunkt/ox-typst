@@ -1,0 +1,9 @@
+* Table
+
+=The following table contains verbatim content=
+
+#+CAPTION: special table
+| #A | =Verbatim= |
+|----+------------|
+|  1 |          2 |
+|  6 |          7 |

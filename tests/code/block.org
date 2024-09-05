@@ -1,0 +1,9 @@
+* Block
+
+Here is how we define present code.
+
+#+CAPTION: Example Bash code.
+#+BEGIN_SRC bash
+  # print hi to console
+  echo "hi"
+#+END_SRC

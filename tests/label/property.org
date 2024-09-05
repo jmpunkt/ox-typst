@@ -1,0 +1,6 @@
+* Section One
+:PROPERTIES:
+:CUSTOM_ID: section:one
+:END:
+
+Lets see if that works [[#sec:one]] or even with a custom message [[#sec:one][Goto Heading]]

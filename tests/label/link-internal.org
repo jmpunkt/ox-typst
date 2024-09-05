@@ -1,0 +1,4 @@
+* Link in Headline <<section:one>>
+
+Here without name [[section:one]] and here with name [[section:one][My Custom Section Name]].
+

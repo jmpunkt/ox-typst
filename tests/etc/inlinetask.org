@@ -1,0 +1,9 @@
+*************** TODO some tiny task
+This is a paragraph, it lies outside the inlinetask above.
+*************** TODO some small task
+                 DEADLINE: <2009-03-30 Mon>
+                 :PROPERTIES:
+                   :SOMETHING: or other
+                 :END:
+                 And here is some extra text
+*************** END

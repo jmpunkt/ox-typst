@@ -1,0 +1,14 @@
+* Math
+Currently Typst Math is not recoginized. It is possible to write Typst math directly in Org.
+
+$ 1 * 1 $
+
+To be safe that this behavior does not break in the future, one should use an export block.
+
+#+BEGIN_EXPORT typst
+$ 1 * 1 $
+#+END_EXPORT
+
+Escaping the dollar symbol is also recommended:
+
+And here is some \$ dollar symbol.

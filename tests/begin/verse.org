@@ -1,0 +1,15 @@
+* Verse
+
+Here we produce a non formatted and whites pace preserving block.
+
+#+BEGIN_VERSE
+jaksg  ksgj dkg dfg
+dgds
+g dfg d
+ g d
+ s fg
+ dsfgdsgdsfg kjdfgdfg
+ df g
+ dsdsfg
+ dsfg dsgds g
+#+END_VERSE
