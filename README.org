@@ -62,6 +62,16 @@ Supported styles are listed [[https://typst.app/docs/reference/model/bibliograph
 =apa=) is stringified and put into the =bibliography= function as the
 style argument (like =bibliography("./test.bib", style: "apa")=).
 
+** Math
+
+Currently LaTeX math snippets are not supported. It is currently not possible
+for us to translate these elements into Typst code.
+
+Mabye we should one of the following projects for that:
+
+- https://github.com/msakuta/latypst :: Translate LaTeX snippets to roughly equivalent Typst snippets
+- https://github.com/mitex-rs/mitex :: Emulate LaTeX inside Typst
+
 ** Examples
 
 Take a look at =test/test.org= to get an idea how to use the different
@@ -73,3 +83,36 @@ org-mode statements with Typst. For real examples look in the
 If you want to write a letter using a third party package
 (e.g. https://github.com/Sematre/typst-letter-pro), then take a look
 at =examples/letter.org=.
+
+*** Tests
+
+If you want more examples, maybe look into the tests. The tests contain small
+Org snippets and their Typst representation.
+
+** Development
+
+*** Tests
+
+The tests contain small Org snippets and their Typst output. Changing the
+exporter requires to re-run the exporter on all Org files. One should manually
+check if the output matches the expectation. If the output matches the
+expectation, the newly generated files become the new golden output.
+
+**** Generate
+
+#+BEGIN_SRC org
+emacs --batch -l tests/test.el -f test/generate
+#+END_SRC
+
+**** Run
+
+#+BEGIN_SRC org
+emacs --batch -l tests/test.el -f test/run
+#+END_SRC
+
+**** With Emacs
+
+It is also possible to use these functions inside Emacs. Navigate to the
+=tests/test.el= file and run =eval-buffer=. The =ox-typst.el= and =oc-typst.el=
+are automatically re-loaded from the current Git repository when evaluating the
+buffer.
