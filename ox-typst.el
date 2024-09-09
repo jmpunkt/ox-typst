@@ -96,6 +96,21 @@ The function should return the string to be exported."
                  (const :tag "Translate" translate))
   :group 'org-export-typst)
 
+(defcustom org-typst-export-buffer-major-mode nil
+  "Set the major-mode for buffer created by Org export.
+
+When an Org file is exported to a buffer, the specified major-mode is
+automatically enabled.  This is required, if the name of the created buffer does
+not have the correct suffix.  Emacs is not able to auto-load the correct
+major-mode."
+  :type 'symbol
+  :group 'org-export-typst)
+
+(defcustom org-typst-export-buffer-name "*Org Typst Export*"
+  "Name of the output buffer for exporting."
+  :type 'string
+  :group 'org-export-typst)
+
 ;; Export
 (org-export-define-backend 'typst
   '((bold . org-typst-bold)
@@ -148,7 +163,7 @@ The function should return the string to be exported."
     (verse-block . org-typst-verse-block))
   :menu-entry
   '(?y "Export to Typst"
-       ((?F "As Typst buffer" org-typst-export-to-typst)
+       ((?F "As Typst buffer" org-typst-export-as-typst)
 	    (?f "As Typst file" org-typst-export-to-typst)
 	    (?p "As PDF file" org-typst-export-to-pdf)))
   :options-alist
@@ -545,6 +560,16 @@ The function should return the string to be exported."
       (format "#datetime(year: %s, month: %s, day: %s).display()" year month day))))
 
 ;; Commands
+(defun org-typst-export-as-typst
+    (&optional async subtreep visible-only body-only ext-plist)
+  (interactive)
+  (org-export-to-buffer 'typst org-typst-export-buffer-name
+    async subtreep visible-only body-only ext-plist
+    ;; TODO: use org-typst-export-buffer-major-mode
+    (when org-typst-export-buffer-major-mode
+      (if (fboundp 'major-mode-remap)
+          (major-mode-remap org-typst-export-buffer-major-mode)
+        org-typst-export-buffer-major-mode))))
 
 (defun org-typst-export-to-typst
     (&optional async subtreep visible-only body-only ext-plist)
