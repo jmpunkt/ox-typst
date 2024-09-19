@@ -111,6 +111,11 @@ major-mode."
   :type 'string
   :group 'org-export-typst)
 
+(defcustom org-typst-custom-id-prefix "id:"
+  "Prefix for all links using the custom id property."
+  :type 'string
+  :group 'org-export-typst)
+
 ;; Export
 (org-export-define-backend 'typst
   '((bold . org-typst-bold)
@@ -188,7 +193,7 @@ major-mode."
   (let* ((name (org-element-property :drawer-name drawer))
 	     (output (funcall (plist-get info :typst-format-drawer-function)
 			              name contents)))
-    (org-typst--label output drawer)))
+    (org-typst--label output drawer info)))
 
 (defun org-typst-dynamic-block (_dynamic-block contents _info)
   contents)
@@ -231,10 +236,17 @@ major-mode."
               (title-raw (car (org-element-property :title headline)))
               (title (if (stringp title-raw)
                          (org-typst--escape '("#") title-raw)
-                       (org-export-data title-raw info))))
+                       (org-export-data title-raw info)))
+              (label (org-typst--label nil headline info)))
     (if (string-equal (org-element-property :UNNUMBERED headline) "notoc")
-        (format "#heading(level: %s, outlined: false)[%s]\n%s" level title contents)
-      (concat (org-typst--sections level) " " title "\n" contents))))
+        (format "#heading(level: %s, outlined: false)[%s]\n%s%s" level title contents label)
+      (concat
+       (org-typst--sections level)
+       " "
+       title
+       label
+       "\n"
+       contents))))
 
 (defun org-typst-horizontal-rule (_horizontal-rule _contents _info)
   ""
@@ -255,7 +267,7 @@ major-mode."
 		           (org-export-get-tags inlinetask info)))
 	    (priority (and (plist-get info :with-priority)
 		               (org-element-property :priority inlinetask)))
-	    (contents (org-typst--label contents inlinetask)))
+	    (contents (org-typst--label contents inlinetask info)))
     (funcall (plist-get info :typst-format-inlinetask-function)
 	         todo todo-type priority title tags contents info)))
 
@@ -333,29 +345,35 @@ major-mode."
   "#linebreak")
 
 (defun org-typst-link (link contents info)
-  (pcase (org-element-property :type link)
-    ((pred (string-equal "radio"))
-     (when-let ((ref (org-export-get-reference (org-export-resolve-radio-link link info) info)))
-       (format "#link(label(%s))[%s]"
-               (org-typst--as-string ref)
-               (org-trim contents))))
-    ((pred (string-equal "file"))
-     (org-typst--figure (format "#image(%s)" (org-typst--as-string (org-element-property :path link))) link info))
-    (_
-     (when-let ((raw-path (org-element-property :raw-link link)))
-       (pcase (org-element-property :type link)
-         ("fuzzy"
-          (if contents
-              (format "#link(label(%s))[%s]" (org-typst--as-string raw-path) (org-trim contents))
-            (format "#ref(label(%s))" (org-typst--as-string raw-path))))
-         (_
-          (format "#link(%s)%s"
-                  (org-typst--as-string raw-path)
-                  (if contents
-                      (format "[%s] #footnote(link(%s))"
-                              (org-trim contents)
-                              (org-typst--as-string raw-path))
-                    ""))))))))
+  (let ((link-path (org-typst--as-string (org-element-property :path link)))
+        (link-raw (org-typst--as-string (org-element-property :raw-link link))))
+    (pcase (org-element-property :type link)
+      ((pred (string-equal "radio"))
+       (when-let ((ref (org-export-get-reference (org-export-resolve-radio-link link info) info)))
+         (format "#link(label(%s))[%s]"
+                 (org-typst--as-string ref)
+                 (org-trim contents))))
+      ((pred (string-equal "file"))
+       (org-typst--figure (format "#image(%s)" link-raw) link info))
+      ((pred (string-equal "custom-id"))
+       (let ((link-path (org-typst--as-string (concat org-typst-custom-id-prefix (org-element-property :path link)))))
+         (if contents
+             (format "#link(label(%s))[%s]" link-path (org-trim contents))
+           (format "#ref(label(%s))" link-path))))
+      ((pred (string-equal "fuzzy"))
+       (let ((link-path (org-typst--as-string (org-export-get-reference (org-export-resolve-fuzzy-link link info) info))))
+         (if contents
+             (format "#link(label(%s))[%s]" link-path (org-trim contents))
+           (format "#ref(label(%s))" link-path))))
+      ;; Other like HTTP (external)
+      (_
+       (format "#link(%s)%s"
+               (org-typst--as-string link-raw)
+               (if contents
+                   (format "[%s] #footnote(link(%s))"
+                           (org-trim contents)
+                           link-raw)
+                 ""))))))
 
 (defun org-typst-node-property (_node-property _contents _info)
   (message "// todo: org-typst-node-property"))
@@ -394,9 +412,8 @@ major-mode."
 (defun org-typst-quote-block (quote-block contents info)
   (org-typst--raw contents nil 1 quote-block info))
 
-(defun org-typst-radio-target (radio-target text info)
-  (when-let ((ref (org-export-get-reference radio-target info)))
-    (format "%s <%s>" text ref)))
+(defun org-typst-radio-target (_radio-target text _info)
+  text)
 
 (defun org-typst-section (_section contents _info)
   contents)
@@ -438,9 +455,8 @@ major-mode."
 (defun org-typst-table-row (_table-row contents _info)
   contents)
 
-(defun org-typst-target (target _contents _info)
-  (let ((label (org-element-property :value target)))
-    (org-typst--label label target label)))
+(defun org-typst-target (target _contents info)
+  (org-typst--label (org-element-property :value target) target info))
 
 (defun org-typst-template (contents info)
   (let ((title (plist-get info :title))
@@ -507,14 +523,16 @@ major-mode."
      element
      info)))
 
-(defun org-typst--label (content item &optional label)
-  (let ((label (or label
-                   (org-element-property :name item)
+(defun org-typst--label (content item info)
+  (let ((label (or (org-element-property :name item)
                    (org-element-property :label item)
+                   ;; TODO: Check if this is only for headlines and inlinetasks (ref: ox-latex)
+                   (when (string= (org-element-type item) "headline") (when-let ((value (org-element-property :CUSTOM_ID item))) (concat org-typst-custom-id-prefix value)))
                    (org-element-property :name (org-export-get-parent item))
-                   (org-element-property :label (org-export-get-parent item)))))
+                   (org-element-property :label (org-export-get-parent item))
+                   (when (string= (org-element-type item) "headline") (org-export-get-reference item info)))))
     (if label
-        (format "%s <%s>" content label)
+        (format "%s <%s>" (or content "") label)
       content)))
 
 (defun org-typst--figure (content element info)
@@ -525,7 +543,8 @@ major-mode."
      (if caption
          (format "#figure([%s], caption: [%s])" content caption)
        content)
-     element)))
+     element
+     info)))
 
 (defun org-typst--sections (level)
   (format "%s" (seq-reduce #'concat (mapcar (lambda (_elm) "=") (number-sequence 1 level)) "")))

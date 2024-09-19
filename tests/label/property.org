@@ -1,6 +1,9 @@
+#+TYPST: #set heading(numbering: "1.")
+
 * Section One
 :PROPERTIES:
-:CUSTOM_ID: section:one
+:CUSTOM_ID: sec:one
 :END:
 
-Lets see if that works [[#sec:one]] or even with a custom message [[#sec:one][Goto Heading]]
+Lets see if that works if we can link the section with its full name like:
+[[#sec:one]]. Now we want a name custom name like: [[#sec:one][Goto Heading]]
