@@ -14,6 +14,8 @@
 This should include all levels.
 * B
 #+TYPST: #figure(circle(radius: 50pt), caption: [Large circle])
+* XX
+
 * C
 #+CAPTION[Example code]: This is example code.
 #+BEGIN_SRC lisp
