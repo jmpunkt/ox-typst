@@ -116,6 +116,11 @@ major-mode."
   :type 'string
   :group 'org-export-typst)
 
+(defcustom org-typst-heading-numbering "1."
+  "Default numbering for headline used for the generated document."
+  :type 'string
+  :group 'org-export-typst)
+
 ;; Export
 (org-export-define-backend 'typst
   '((bold . org-typst-bold)
@@ -478,6 +483,7 @@ major-mode."
         ")\n"))
      (when language (format "#set text(lang: \"%s\")\n" language))
      (when toc "#outline()\n")
+     (format "#set heading(numbering: %s)\n" (org-typst--as-string org-typst-heading-numbering))
      contents)))
 
 (defun org-typst-timestamp (timestamp _contents _info)
