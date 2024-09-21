@@ -3,7 +3,7 @@
 #outline(title: none)
 = A <org0000006>
 == A1 <org0000003>
-#heading(level: 3, outlined: false)[A11]
- <org0000000>
-= B <org0000009>
-= C <org000000c>
+=== A11 <org0000000>
+#heading(level: 1, outlined: false, numbering: none)[B] <org000000c>
+#heading(level: 2, outlined: false, numbering: none)[B1] <org0000009>
+= C <org000000f>

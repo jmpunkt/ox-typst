@@ -243,15 +243,17 @@ major-mode."
                          (org-typst--escape '("#") title-raw)
                        (org-export-data title-raw info)))
               (label (org-typst--label nil headline info)))
-    (if (string-equal (org-element-property :UNNUMBERED headline) "notoc")
-        (format "#heading(level: %s, outlined: false)[%s]\n%s%s" level title contents label)
-      (concat
-       (org-typst--sections level)
-       " "
-       title
-       label
-       "\n"
-       contents))))
+    (concat
+     ;; This mirrors the behavior of LaTeX. We could display the item
+     ;; in the TOC, even if that item is unnumbered. But the resulting
+     ;; TOC looks wrong without numbering.
+     (if (or (org-export-excluded-from-toc-p headline info)
+             (not (org-export-numbered-headline-p headline info)))
+         (format "#heading(level: %s, outlined: false, numbering: none)[%s]" level title)
+       (concat (org-typst--sections level) " " title))
+     label
+     "\n"
+     contents)))
 
 (defun org-typst-horizontal-rule (_horizontal-rule _contents _info)
   ""

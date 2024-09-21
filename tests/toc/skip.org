@@ -5,8 +5,9 @@
 * A
 ** A1
 *** A11
+* B
 :PROPERTIES:
 :UNNUMBERED: notoc
 :END:
-* B
+** B1
 * C

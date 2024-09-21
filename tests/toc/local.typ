@@ -35,11 +35,11 @@
 }
 Expecting a TOC with the entries B11, B111, B12, B121, B13, B131.
 === B11 <org000000c>
-==== B111 <org0000009>
+#heading(level: 4, outlined: false, numbering: none)[B111] <org0000009>
 === B12 <org0000012>
-==== B121 <org000000f>
+#heading(level: 4, outlined: false, numbering: none)[B121] <org000000f>
 === B13 <org0000018>
-==== B131 <org0000015>
+#heading(level: 4, outlined: false, numbering: none)[B131] <org0000015>
 = B2 <org0000036>
 == B1 <org0000033>
 #context {
@@ -72,9 +72,9 @@ Expecting a TOC with the entries B11, B111, B12, B121, B13, B131.
 }
 Expecting a TOC with the entries B21, B22, B23.
 === B21 <org0000024>
-==== B211 <org0000021>
+#heading(level: 4, outlined: false, numbering: none)[B211] <org0000021>
 === B22 <org000002a>
-==== B221 <org0000027>
+#heading(level: 4, outlined: false, numbering: none)[B221] <org0000027>
 === B23 <org0000030>
-==== B231 <org000002d>
+#heading(level: 4, outlined: false, numbering: none)[B231] <org000002d>
 = C <org0000039>
