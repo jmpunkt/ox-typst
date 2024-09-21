@@ -1,5 +1,6 @@
 #set text(lang: "en")
 #outline()
+#set heading(numbering: "1.")
 = First Page <org0000000>
 #raw(block: true, lang: "bash", "# print hi to console
 echo \u{22}hi\u{22}") <my code>

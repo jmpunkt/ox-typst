@@ -1,5 +1,6 @@
 #set text(lang: "en")
 #outline()
+#set heading(numbering: "1.")
 // example theme inspired by the modus-theme
 
 #let modus-themes-color-warm = rgb(93, 48, 38)

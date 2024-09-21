@@ -1,5 +1,6 @@
 #set text(lang: "en")
 #outline()
+#set heading(numbering: "1.")
 = Figure <org0000000>
 Now lets insert a black rectangle.
 

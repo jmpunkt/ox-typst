@@ -1,4 +1,5 @@
 #set text(lang: "en")
+#set heading(numbering: "1.")
 #outline(title: none, depth: 2)
 = A <org0000006>
 == A1 <org0000003>

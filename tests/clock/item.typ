@@ -1,5 +1,6 @@
 #set text(lang: "en")
 #outline()
+#set heading(numbering: "1.")
 = Clock <org0000003>
 Here we have an example task with time information. Lets see how this is
 represented in Typst.

@@ -1,5 +1,6 @@
 #set text(lang: "en")
 #outline()
+#set heading(numbering: "1.")
 = Block <org0000000>
 Here is how we define present code.
 

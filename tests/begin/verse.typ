@@ -1,5 +1,6 @@
 #set text(lang: "en")
 #outline()
+#set heading(numbering: "1.")
 = Verse <org0000000>
 Here we produce a non formatted and whites pace preserving block.
 

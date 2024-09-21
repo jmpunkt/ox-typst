@@ -1,5 +1,6 @@
 #set text(lang: "en")
 #outline()
+#set heading(numbering: "1.")
 = Table <org0000000>
 #raw("The following table contains verbatim content")
 

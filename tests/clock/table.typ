@@ -1,5 +1,6 @@
 #set text(lang: "en")
 #outline()
+#set heading(numbering: "1.")
 = Clocktable <org000000f>
 #figure([#table(columns: 4, [Headline],[Time],[],[],
 [#text(weight: "bold", [Total time])],[#text(weight: "bold", [3:54])],[],[],
