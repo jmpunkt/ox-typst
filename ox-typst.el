@@ -111,11 +111,6 @@ major-mode."
   :type 'string
   :group 'org-export-typst)
 
-(defcustom org-typst-custom-id-prefix "id:"
-  "Prefix for all links using the custom id property."
-  :type 'string
-  :group 'org-export-typst)
-
 (defcustom org-typst-heading-numbering "1."
   "Default numbering for headline used for the generated document."
   :type 'string
