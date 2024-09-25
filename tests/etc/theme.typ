@@ -53,5 +53,5 @@ text(modus-themes-color-inlinecodefg, size: 0.889em, it.text)
 #set footnote.entry(
   separator: text(modus-themes-color-basefgalt, repeat[.])
 )
-= Section 1 <org0000000>
+#heading(level: 1)[Section 1] <org0000000>
 Here should be some text

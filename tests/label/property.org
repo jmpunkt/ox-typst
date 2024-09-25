@@ -1,5 +1,3 @@
-#+TYPST: #set heading(numbering: "1.")
-
 * Section One
 :PROPERTIES:
 :CUSTOM_ID: sec:one

@@ -238,19 +238,19 @@ major-mode."
 
 (defun org-typst-headline (headline contents info)
   (when-let* ((level (org-element-property :level headline))
-              (title-raw (car (org-element-property :title headline)))
-              (title (if (stringp title-raw)
-                         (org-typst--escape '("#") title-raw)
-                       (org-export-data title-raw info)))
+              (title (org-export-data (org-element-property :title headline) info))
               (label (org-typst--label nil headline info)))
     (concat
-     ;; This mirrors the behavior of LaTeX. We could display the item
-     ;; in the TOC, even if that item is unnumbered. But the resulting
-     ;; TOC looks wrong without numbering.
-     (if (or (org-export-excluded-from-toc-p headline info)
-             (not (org-export-numbered-headline-p headline info)))
-         (format "#heading(level: %s, outlined: false, numbering: none)[%s]" level title)
-       (concat (org-typst--sections level) " " title))
+     (format "#heading(level: %s%s)"
+             level
+             ;; This mirrors the behavior of LaTeX. We could display the item in
+             ;; the TOC, even if that item is unnumbered. But the resulting TOC
+             ;; looks wrong without numbering.
+             (if (or (org-export-excluded-from-toc-p headline info)
+                     (not (org-export-numbered-headline-p headline info)))
+                 ", outlined: false, numbering: none"
+               ""))
+     (format "[%s]" title)
      label
      "\n"
      contents)))
@@ -352,35 +352,39 @@ major-mode."
   "#linebreak")
 
 (defun org-typst-link (link contents info)
-  (let ((link-path (org-typst--as-string (org-element-property :path link)))
-        (link-raw (org-typst--as-string (org-element-property :raw-link link))))
+  (let ((link-raw (org-typst--as-string (org-element-property :raw-link link)))
+        ;; NOTE: Typst is a bit picky about labels inside headlines. If we point
+        ;; to an element inside a headline, we need to point to the headline
+        ;; instead. Most of the time this is what you want, but it might not be
+        ;; correct.
+        (resolve-headline-friendly (lambda (target) (let ((parent (org-element-parent-element target)))
+                                                      (if (string= (org-element-type parent) "headline")
+                                                          (org-export-get-reference parent info)
+                                                        (org-export-get-reference target info))))))
     (pcase (org-element-property :type link)
-      ((pred (string-equal "radio"))
-       (when-let ((ref (org-export-get-reference (org-export-resolve-radio-link link info) info)))
-         (format "#link(label(%s))[%s]"
-                 (org-typst--as-string ref)
-                 (org-trim contents))))
-      ((pred (string-equal "file"))
-       (org-typst--figure (format "#image(%s)" link-raw) link info))
-      ((pred (string-equal "custom-id"))
-       (let ((link-path (org-typst--as-string (concat org-typst-custom-id-prefix (org-element-property :path link)))))
-         (if contents
-             (format "#link(label(%s))[%s]" link-path (org-trim contents))
-           (format "#ref(label(%s))" link-path))))
-      ((pred (string-equal "fuzzy"))
-       (let ((link-path (org-typst--as-string (org-export-get-reference (org-export-resolve-fuzzy-link link info) info))))
-         (if contents
-             (format "#link(label(%s))[%s]" link-path (org-trim contents))
-           (format "#ref(label(%s))" link-path))))
-      ;; Other like HTTP (external)
-      (_
-       (format "#link(%s)%s"
-               (org-typst--as-string link-raw)
-               (if contents
-                   (format "[%s] #footnote(link(%s))"
-                           (org-trim contents)
-                           link-raw)
-                 ""))))))
+      ("radio"
+       (when-let* ((target (org-export-resolve-radio-link link info))
+                   (ref (funcall resolve-headline-friendly target)))
+       (format "#link(label(%s))[%s]"
+               (org-typst--as-string ref)
+               (org-trim contents))))
+    ("file"
+     (org-typst--figure (format "#image(%s)" link-raw) link info))
+    ((or "custom-id" "id" "fuzzy")
+     (let* ((target (org-export-resolve-link link info))
+            (link-path (org-typst--as-string (funcall resolve-headline-friendly target))))
+       (if contents
+           (format "#link(label(%s))[%s]" link-path (org-trim contents))
+         (format "#ref(label(%s))" link-path))))
+    ;; Other like HTTP (external)
+    (_
+     (format "#link(%s)%s"
+             (org-typst--as-string link-raw)
+             (if contents
+                 (format "[%s] #footnote(link(%s))"
+                         (org-trim contents)
+                         link-raw)
+               ""))))))
 
 (defun org-typst-node-property (_node-property _contents _info)
   (message "// todo: org-typst-node-property"))
@@ -462,8 +466,8 @@ major-mode."
 (defun org-typst-table-row (_table-row contents _info)
   contents)
 
-(defun org-typst-target (target _contents info)
-  (org-typst--label (org-element-property :value target) target info))
+(defun org-typst-target (_target contents _info)
+  contents)
 
 (defun org-typst-template (contents info)
   (let ((title (plist-get info :title))
@@ -532,20 +536,15 @@ major-mode."
      info)))
 
 (defun org-typst--label (content item info)
-  (let ((label (or (org-element-property :name item)
-                   (org-element-property :label item)
-                   ;; TODO: Check if this is only for headlines and inlinetasks (ref: ox-latex)
-                   (when (string= (org-element-type item) "headline") (when-let ((value (org-element-property :CUSTOM_ID item))) (concat org-typst-custom-id-prefix value)))
-                   (org-element-property :name (org-export-get-parent item))
-                   (org-element-property :label (org-export-get-parent item))
-                   (when (string= (org-element-type item) "headline") (org-export-get-reference item info)))))
+  (let ((label (or (org-export-get-reference item info)
+                   (org-export-get-reference (org-element-parent item) info))))
     (if label
         (format "%s <%s>" (or content "") label)
       content)))
 
 (defun org-typst--figure (content element info)
   (let* ((raw (or (org-export-get-caption element)
-                  (org-export-get-caption (org-export-get-parent-element element))))
+                  (org-export-get-caption (org-element-parent-element element))))
          (caption (when raw (mapconcat (lambda (e) (if (stringp e) e (org-export-data e info))) raw))))
     (org-typst--label
      (if caption

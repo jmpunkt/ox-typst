@@ -1,7 +1,7 @@
 #set text(lang: "en")
 #outline()
 #set heading(numbering: "1.")
-= Verse <org0000000>
+#heading(level: 1)[Verse] <org0000001>
 Here we produce a non formatted and whites pace preserving block.
 
 #raw(block: true, "jaksg  ksgj dkg dfg
@@ -12,4 +12,4 @@ g dfg d
  dsfgdsgdsfg kjdfgdfg
  df g
  dsdsfg
- dsfg dsgds g")
+ dsfg dsgds g") <org0000000>
