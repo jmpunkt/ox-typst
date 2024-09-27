@@ -191,8 +191,8 @@ major-mode."
 
 (defun org-typst-drawer (drawer contents info)
   (let* ((name (org-element-property :drawer-name drawer))
-	     (output (funcall (plist-get info :typst-format-drawer-function)
-			              name contents)))
+	       (output (funcall (plist-get info :typst-format-drawer-function)
+			                    name contents)))
     (org-typst--label output drawer info)))
 
 (defun org-typst-dynamic-block (_dynamic-block contents _info)
@@ -218,9 +218,9 @@ major-mode."
   (org-typst--raw (org-element-property :value fixed-width) nil nil fixed-width info))
 
 (defun org-typst-footnote-definition (footnote-definition contents _info)
-  (format "#hide[#footnote[%s] <%s>]"
+  (format "#hide[#footnote[%s] #label(%s)]"
           (org-trim contents)
-          (org-element-property :label footnote-definition)))
+          (org-typst--as-string (org-element-property :label footnote-definition))))
 
 (defun org-typst-footnote-reference (footnote-reference contents _info)
   (let ((label (org-element-property :label footnote-reference)))
@@ -238,9 +238,6 @@ major-mode."
     (concat
      (format "#heading(level: %s%s)"
              level
-             ;; This mirrors the behavior of LaTeX. We could display the item in
-             ;; the TOC, even if that item is unnumbered. But the resulting TOC
-             ;; looks wrong without numbering.
              (if (or (org-export-excluded-from-toc-p headline info)
                      (not (org-export-numbered-headline-p headline info)))
                  ", outlined: false, numbering: none"
@@ -261,17 +258,17 @@ major-mode."
 
 (defun org-typst-inlinetask (inlinetask contents info)
   (let ((title (org-export-data (org-element-property :title inlinetask) info))
-	    (todo (and (plist-get info :with-todo-keywords)
-		           (let ((todo (org-element-property :todo-keyword inlinetask)))
-		             (and todo (org-export-data todo info)))))
-	    (todo-type (org-element-property :todo-type inlinetask))
-	    (tags (and (plist-get info :with-tags)
-		           (org-export-get-tags inlinetask info)))
-	    (priority (and (plist-get info :with-priority)
-		               (org-element-property :priority inlinetask)))
-	    (contents (org-typst--label contents inlinetask info)))
+	      (todo (and (plist-get info :with-todo-keywords)
+		               (let ((todo (org-element-property :todo-keyword inlinetask)))
+		                 (and todo (org-export-data todo info)))))
+	      (todo-type (org-element-property :todo-type inlinetask))
+	      (tags (and (plist-get info :with-tags)
+		               (org-export-get-tags inlinetask info)))
+	      (priority (and (plist-get info :with-priority)
+		                   (org-element-property :priority inlinetask)))
+	      (contents (org-typst--label contents inlinetask info)))
     (funcall (plist-get info :typst-format-inlinetask-function)
-	         todo todo-type priority title tags contents info)))
+	           todo todo-type priority title tags contents info)))
 
 (defun org-typst-italic (_italic contents _info)
   (format "#emph[%s]" contents))
@@ -360,26 +357,28 @@ major-mode."
       ("radio"
        (when-let* ((target (org-export-resolve-radio-link link info))
                    (ref (funcall resolve-headline-friendly target)))
-       (format "#link(label(%s))[%s]"
-               (org-typst--as-string ref)
-               (org-trim contents))))
-    ("file"
-     (org-typst--figure (format "#image(%s)" link-raw) link info))
-    ((or "custom-id" "id" "fuzzy")
-     (let* ((target (org-export-resolve-link link info))
-            (link-path (org-typst--as-string (funcall resolve-headline-friendly target))))
-       (if contents
-           (format "#link(label(%s))[%s]" link-path (org-trim contents))
-         (format "#ref(label(%s))" link-path))))
-    ;; Other like HTTP (external)
-    (_
-     (format "#link(%s)%s"
-             (org-typst--as-string link-raw)
-             (if contents
-                 (format "[%s] #footnote(link(%s))"
-                         (org-trim contents)
-                         link-raw)
-               ""))))))
+         (format "#link(label(%s))[%s]"
+                 (org-typst--as-string ref)
+                 (org-trim contents))))
+      ("file"
+       (org-typst--figure (format "#image(%s)" (org-typst--as-string (org-element-property :path link)))
+                          link
+                          info))
+      ((or "custom-id" "id" "fuzzy")
+       (let* ((target (org-export-resolve-link link info))
+              (link-path (org-typst--as-string (funcall resolve-headline-friendly target))))
+         (if contents
+             (format "#link(label(%s))[%s]" link-path (org-trim contents))
+           (format "#ref(label(%s))" link-path))))
+      ;; Other like HTTP (external)
+      (_
+       (format "#link(%s)%s"
+               (org-typst--as-string link-raw)
+               (if contents
+                   (format "[%s] #footnote(link(%s))"
+                           (org-trim contents)
+                           link-raw)
+                 ""))))))
 
 (defun org-typst-node-property (_node-property _contents _info)
   (message "// todo: org-typst-node-property"))
@@ -418,8 +417,8 @@ major-mode."
 (defun org-typst-quote-block (quote-block contents info)
   (org-typst--raw contents nil 1 quote-block info))
 
-(defun org-typst-radio-target (_radio-target text _info)
-  text)
+(defun org-typst-radio-target (radio-target text info)
+  (org-typst--label text radio-target info))
 
 (defun org-typst-section (_section contents _info)
   contents)
@@ -461,8 +460,8 @@ major-mode."
 (defun org-typst-table-row (_table-row contents _info)
   contents)
 
-(defun org-typst-target (_target contents _info)
-  contents)
+(defun org-typst-target (target contents info)
+  (org-typst--label contents target info))
 
 (defun org-typst-template (contents info)
   (let ((title (plist-get info :title))
@@ -533,8 +532,10 @@ major-mode."
 (defun org-typst--label (content item info)
   (let ((label (or (org-export-get-reference item info)
                    (org-export-get-reference (org-element-parent item) info))))
-    (if label
-        (format "%s <%s>" (or content "") label)
+    (if (and label
+             (or (string= (org-element-type item) "headline")
+                 (not (string= (org-element-type (org-element-parent-element item)) "headline"))))
+        (format "%s #label(%s)" (or content "") (org-typst--as-string label))
       content)))
 
 (defun org-typst--figure (content element info)
