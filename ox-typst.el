@@ -415,7 +415,14 @@ major-mode."
        (org-typst--raw contents nil nil property-drawer info)))
 
 (defun org-typst-quote-block (quote-block contents info)
-  (org-typst--raw contents nil 1 quote-block info t))
+  (let ((attribution (org-export-read-attribute :attr_typst quote-block :author)))
+    (when contents
+      (org-typst--figure
+       (format "#quote(block: true%s, %s)"
+               (if attribution (format ", attribution: %s" (org-typst--as-string attribution)) "")
+               (org-typst--as-string contents))
+       quote-block
+       info))))
 
 (defun org-typst-radio-target (radio-target text info)
   (org-typst--label text radio-target info))

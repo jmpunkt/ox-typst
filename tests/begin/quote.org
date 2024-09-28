@@ -1,0 +1,14 @@
+* Quote
+
+** With Attribution
+ #+ATTR_TYPST: :author Albert Einstein
+ #+ATTR_TEXINFO: :author Albert Einstein
+ #+BEGIN_QUOTE
+ Everything should be made as simple as possible,
+ but not any simpler
+ #+END_QUOTE
+** Without Attribution
+ #+BEGIN_QUOTE
+ Everything should be made as simple as possible,
+ but not any simpler --  Albert Einstein
+ #+END_QUOTE
