@@ -1,0 +1,5 @@
+* Center
+
+#+BEGIN_CENTER
+This content now should be centered.
+#+END_CENTER

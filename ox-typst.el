@@ -180,7 +180,7 @@ major-mode."
   (format "#text(weight: \"bold\", [%s])" contents))
 
 (defun org-typst-center-block (_center-block contents _info)
-  (format "#set align(center)[%s]" contents))
+  (format "#align(center)[%s]" contents))
 
 (defun org-typst-clock (_clock _contents _info)
   (message "// todo: org-typst-clock"))
