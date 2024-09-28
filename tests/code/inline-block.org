@@ -1,0 +1,4 @@
+* Inline
+
+So this should be inline now src_sh[:exports code]{echo "inline"}. Lets see if that
+works.

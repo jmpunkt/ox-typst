@@ -187,7 +187,7 @@ major-mode."
 
 (defun org-typst-code (code _contents info)
   (when-let ((code (org-element-property :value code)))
-    (org-typst--raw code nil nil code info)))
+    (org-typst--raw code nil nil code info t)))
 
 (defun org-typst-drawer (drawer contents info)
   (let* ((name (org-element-property :drawer-name drawer))
@@ -215,7 +215,7 @@ major-mode."
     (org-element-property :value export-snippet)))
 
 (defun org-typst-fixed-width (fixed-width _contents info)
-  (org-typst--raw (org-element-property :value fixed-width) nil nil fixed-width info))
+  (org-typst--raw (org-element-property :value fixed-width) nil nil fixed-width info t))
 
 (defun org-typst-footnote-definition (footnote-definition contents _info)
   (format "#hide[#footnote[%s] #label(%s)]"
@@ -254,7 +254,7 @@ major-mode."
 (defun org-typst-inline-src-block (inline-src-block _contents info)
   (when-let ((code (org-element-property :value inline-src-block))
              (lang (org-element-property :language inline-src-block)))
-    (org-typst--raw code lang nil inline-src-block info)))
+    (org-typst--raw code lang nil inline-src-block info t)))
 
 (defun org-typst-inlinetask (inlinetask contents info)
   (let ((title (org-export-data (org-element-property :title inlinetask) info))
@@ -415,7 +415,7 @@ major-mode."
        (org-typst--raw contents nil nil property-drawer info)))
 
 (defun org-typst-quote-block (quote-block contents info)
-  (org-typst--raw contents nil 1 quote-block info))
+  (org-typst--raw contents nil 1 quote-block info t))
 
 (defun org-typst-radio-target (radio-target text info)
   (org-typst--label text radio-target info))
@@ -501,7 +501,7 @@ major-mode."
           (org-typst--as-string (org-element-property :value verbatim))))
 
 (defun org-typst-verse-block (verse-block contents info)
-  (org-typst--raw contents nil 1 verse-block info))
+  (org-typst--raw contents nil 1 verse-block info t))
 
 (defun org-typst-latex-environment (_latex-environment _contents _info)
   (message "// todo: org-typst-latex-environment"))
@@ -519,7 +519,7 @@ major-mode."
    ((eq org-typst-latex-fragment-behavior 'translate) (message "// todo: latex-fragment-translate"))))
 
 ;; Helper
-(defun org-typst--raw (content language block element info)
+(defun org-typst--raw (content language block element info &optional no-figure)
   (when content
     (org-typst--figure
      (format "#raw(block: %s, %s%s)"
@@ -527,7 +527,8 @@ major-mode."
              (if language (concat "lang: " (org-typst--language language) ", ") "")
              (org-typst--as-string content))
      element
-     info)))
+     info
+     no-figure)))
 
 (defun org-typst--label (content item info)
   (let ((label (or (org-export-get-reference item info)
@@ -538,14 +539,16 @@ major-mode."
         (format "%s #label(%s)" (or content "") (org-typst--as-string label))
       content)))
 
-(defun org-typst--figure (content element info)
+(defun org-typst--figure (content element info &optional no-figure)
   (let* ((raw (or (org-export-get-caption element)
                   (org-export-get-caption (org-element-parent-element element))))
          (caption (when raw (mapconcat (lambda (e) (if (stringp e) e (org-export-data e info))) raw))))
     (org-typst--label
-     (if caption
-         (format "#figure([%s], caption: [%s])" content caption)
-       content)
+     (if no-figure
+         content
+       (format "#figure([%s]%s)"
+               content
+               (if caption (format ", caption: [%s]" caption) "")))
      element
      info)))
 

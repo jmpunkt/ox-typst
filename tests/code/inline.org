@@ -1,4 +1,4 @@
 * Inline
 
-So this should be inline now src_sh{echo "inline"}. Lets see if that
+So this should be inline now ~echo "inline"~. Lets see if that
 works.

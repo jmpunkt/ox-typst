@@ -2,8 +2,8 @@
 #outline()
 #set heading(numbering: "1.")
 #heading(level: 1)[First Page] #label("org0000002")
-#raw(block: true, lang: "bash", "# print hi to console
-echo \u{22}hi\u{22}") #label("org0000000")
+#figure([#raw(block: true, lang: "bash", "# print hi to console
+echo \u{22}hi\u{22}")]) #label("org0000000")
 
 
 #pagebreak()
