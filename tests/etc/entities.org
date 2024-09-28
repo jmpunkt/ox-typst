@@ -1,0 +1,4 @@
+* Entities
+1\cent.
+100\euro.
+1.5em space:\_   here, all three spaces in =\_   = constitute the entity name.
