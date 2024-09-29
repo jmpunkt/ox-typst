@@ -4,7 +4,7 @@
 #heading(level: 1)[Verse] #label("org0000001")
 Here we produce a non formatted and whites pace preserving block.
 
-#raw(block: true, "jaksg  ksgj dkg dfg
+#figure([#raw(block: true, "jaksg  ksgj dkg dfg
 dgds
 g dfg d
  g d
@@ -12,4 +12,4 @@ g dfg d
  dsfgdsgdsfg kjdfgdfg
  df g
  dsdsfg
- dsfg dsgds g") #label("org0000000")
+ dsfg dsgds g")]) #label("org0000000")
