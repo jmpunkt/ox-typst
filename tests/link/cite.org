@@ -1,4 +1,4 @@
-#+BIBLIOGRAPHY: ./test.bib
+#+BIBLIOGRAPHY: ./cite.bib
 #+print_bibliography: :title "Custom Ttitle For The Bibliography"
 #+CITE_EXPORT: typst apa
 
