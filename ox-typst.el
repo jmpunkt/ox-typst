@@ -527,7 +527,6 @@ major-mode."
 
 ;; Helper
 (defun org-typst--raw (content element info &optional language block)
-  (message "%s\n\n%s" element language)
   (when content
     (let ((raw (format "#raw(block: %s, %s%s)"
                        (if block "true" "false")
