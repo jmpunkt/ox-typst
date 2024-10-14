@@ -116,6 +116,21 @@ major-mode."
   :type 'string
   :group 'org-export-typst)
 
+(defcustom org-typst-inline-image-rules
+  `(("file" . ,(rx "." (or "jpeg" "jpg" "png" "svg") eos))
+    ("https" . ,(rx "." (or "jpeg" "jpg" "png" "svg") eos)))
+  "Rules characterizing image files that can be inlined into Typst.
+
+A rule consists in an association whose key is the type of link
+to consider, and value is a regexp that will be matched against
+link's path.
+
+Note that the support for images is very limited within Typest. See
+https://typst.app/docs/reference/visualize/image/ supprted types."
+  :group 'org-export-latex
+  :type '(alist :key-type (string :tag "Type")
+		            :value-type (regexp :tag "Path")))
+
 ;; Export
 (org-export-define-backend 'typst
   '((bold . org-typst-bold)
@@ -353,32 +368,34 @@ major-mode."
                                                       (if (string= (org-element-type parent) "headline")
                                                           (org-export-get-reference parent info)
                                                         (org-export-get-reference target info))))))
-    (pcase (org-element-property :type link)
-      ("radio"
-       (when-let* ((target (org-export-resolve-radio-link link info))
-                   (ref (funcall resolve-headline-friendly target)))
-         (format "#link(label(%s))[%s]"
-                 (org-typst--as-string ref)
-                 (org-trim contents))))
-      ("file"
-       (org-typst--figure (format "#image(%s)" (org-typst--as-string (org-element-property :path link)))
-                          link
-                          info))
-      ((or "custom-id" "id" "fuzzy")
-       (let* ((target (org-export-resolve-link link info))
-              (link-path (org-typst--as-string (funcall resolve-headline-friendly target))))
-         (if contents
-             (format "#link(label(%s))[%s]" link-path (org-trim contents))
-           (format "#ref(label(%s))" link-path))))
-      ;; Other like HTTP (external)
-      (_
-       (format "#link(%s)%s"
-               (org-typst--as-string link-raw)
-               (if contents
-                   (format "[%s] #footnote(link(%s))"
-                           (org-trim contents)
-                           link-raw)
-                 ""))))))
+    (cond
+     ((org-export-inline-image-p link org-typst-inline-image-rules)
+      (org-typst--figure (format "#image(%s)"
+                                 (org-typst--as-string
+                                  (org-element-property :path (org-export-link-localise link))))
+                         link
+                         info))
+     ((equal (org-element-property :type link) "radio")
+      (when-let* ((target (org-export-resolve-radio-link link info))
+                  (ref (funcall resolve-headline-friendly target)))
+        (format "#link(label(%s))[%s]"
+                (org-typst--as-string ref)
+                (org-trim contents))))
+     ((member (org-element-property :type link) '("custom-id" "id" "fuzzy"))
+      (let* ((target (org-export-resolve-link link info))
+             (link-path (org-typst--as-string (funcall resolve-headline-friendly target))))
+        (if contents
+            (format "#link(label(%s))[%s]" link-path (org-trim contents))
+          (format "#ref(label(%s))" link-path))))
+     ;; Other like HTTP (external)
+     (t
+      (format "#link(%s)%s"
+              (org-typst--as-string link-raw)
+              (if contents
+                  (format "[%s] #footnote(link(%s))"
+                          (org-trim contents)
+                          link-raw)
+                ""))))))
 
 (defun org-typst-node-property (_node-property _contents _info)
   (message "// todo: org-typst-node-property"))
