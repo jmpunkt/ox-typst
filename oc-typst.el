@@ -31,7 +31,7 @@
         (title (plist-get properties :title)))
     (format "#bibliography(%s%s%s)"
             (and style (format "style: \"%s\", " style))
-            (if title (format "title: %s, " (org-typst--as-string title) ""))
+            (if title (format "title: %s, " (org-typst--as-string title)) "")
             (mapconcat (lambda (f) (org-typst--as-string (file-relative-name f dir)))
                        files
                        ", "))))
