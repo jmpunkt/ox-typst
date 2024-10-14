@@ -29,7 +29,7 @@
 (defun org-cite-typst-export-bibliography (keys files style properties backend com)
   (let ((dir (file-name-parent-directory (plist-get com :input-file)))
         (title (plist-get properties :title)))
-    (format "#bibliography(%s%s%s)"
+    (format "#bibliography(%s%s(%s))"
             (and style (format "style: \"%s\", " style))
             (if title (format "title: %s, " (org-typst--as-string title)) "")
             (mapconcat (lambda (f) (org-typst--as-string (file-relative-name f dir)))
