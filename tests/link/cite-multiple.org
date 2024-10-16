@@ -1,0 +1,10 @@
+#+BIBLIOGRAPHY: ./cite.bib
+#+BIBLIOGRAPHY: ./cite-other.bib
+#+print_bibliography:
+#+CITE_EXPORT: typst apa
+
+* Cite
+
+We can cite successfully from multiple bibliographies. Here is a cite from our
+first bibliography [cite:@DUMMY:1]. But we can also reference another
+bibliography like this [cite:@ANOTHER].
