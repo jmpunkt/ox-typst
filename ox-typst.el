@@ -564,15 +564,13 @@ The function should return the string to be exported."
 (defun org-typst-compile (typfile &optional snippet)
   (let* ((log-buf-name "*Org PDF Typst Output*")
          (log-buf (and (not snippet) (get-buffer-create log-buf-name)))
-         (process (format "%s c \"%s\"" org-typst-bin typfile))
-         outfile)
-    (with-current-buffer log-buf
-      (erase-buffer))
-
-    (setq outfile (org-compile-file typfile (list process) "pdf"
-				                            (format "See %S for details" log-buf-name)
-				                            log-buf nil))
-    outfile))
+         (process (format "%s c \"%s\"" org-typst-bin typfile)))
+    (prog1
+	(org-compile-file typfile (list process) "pdf"
+			  (format "See %S for details" log-buf-name)
+			  log-buf nil)
+      (when (zerop (buffer-size log-buf))
+	(kill-buffer log-buf)))))
 
 (require 'oc-typst)
 
