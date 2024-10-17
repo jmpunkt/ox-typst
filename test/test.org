@@ -252,3 +252,7 @@ After the drawer.
 ** TODO Call Trillian for a date on New Years Eve.
 SCHEDULED: <2004-12-25 Sat>
 DEADLINE: <2004-02-29 Sun>
+
+* File Links
+
+The bibliography is [[./test.bib]], this shouldn't be treated as an image.

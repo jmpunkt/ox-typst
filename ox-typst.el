@@ -318,15 +318,18 @@ The function should return the string to be exported."
   "#linebreak")
 
 (defun org-typst-link (link contents info)
-  (pcase (org-element-property :type link)
-    ((pred (string-equal "radio"))
+  (cond
+    ((string-equal "radio" (org-element-property :type link))
      (when-let ((ref (org-export-get-reference (org-export-resolve-radio-link link info) info)))
        (format "#link(label(%s))[%s]"
                (org-typst--as-string ref)
                (org-trim contents))))
-    ((pred (string-equal "file"))
-     (org-typst--figure (format "#image(%s)" (org-typst--as-string (org-element-property :path link))) link info))
-    (_
+    ((org-export-inline-image-p link)
+     (org-typst--figure (format "#image(%s)"
+                                (org-typst--as-string
+                                 (org-element-property :path (org-export-link-localise link))))
+                        link info))
+    (t
      (when-let ((raw-path (org-element-property :raw-link link)))
        (pcase (org-element-property :type link)
          ("fuzzy"
