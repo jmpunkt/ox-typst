@@ -2,6 +2,7 @@
 (require 'vc-git)
 
 (load (file-name-concat (vc-git-root default-directory) "ox-typst.el"))
+(load (file-name-concat (vc-git-root default-directory) "oc-typst.el"))
 
 (defvar org-typst-test--tests-failed 0)
 (defvar org-typst-test--tests-skipped 0)
