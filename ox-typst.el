@@ -127,7 +127,7 @@ link's path.
 
 Note that the support for images is very limited within Typest. See
 https://typst.app/docs/reference/visualize/image/ supprted types."
-  :group 'org-export-latex
+  :group 'org-export-typst
   :type '(alist :key-type (string :tag "Type")
 		            :value-type (regexp :tag "Path")))
 
