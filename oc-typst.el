@@ -26,7 +26,7 @@
 (require 'oc)
 
 ;;; Export capability
-(defun org-cite-typst-export-bibliography (keys files style properties backend com)
+(defun org-cite-typst-export-bibliography (_keys files style properties _backend com)
   (let ((dir (file-name-parent-directory (plist-get com :input-file)))
         (title (plist-get properties :title)))
     (format "#bibliography(%s%s(%s))"
@@ -36,7 +36,7 @@
                        files
                        ", "))))
 
-(defun org-cite-typst-export-citation (citation style _ info)
+(defun org-cite-typst-export-citation (citation style _ _info)
   (let ((references (org-cite-get-references citation)))
     (format "#cite(label(%s)%s)"
             (mapconcat (lambda (r) (org-typst--as-string (org-element-property :key r)))
