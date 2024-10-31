@@ -46,8 +46,8 @@
 
 ;;; Register `typst' processor
 (org-cite-register-processor 'typst
-  :export-bibliography #'org-cite-typst-export-bibliography
-  :export-citation #'org-cite-typst-export-citation)
+                             :export-bibliography #'org-cite-typst-export-bibliography
+                             :export-citation #'org-cite-typst-export-citation)
 
 (provide 'oc-typst)
 ;;; oc-typst.el ends here

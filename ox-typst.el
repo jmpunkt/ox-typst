@@ -133,7 +133,7 @@ Note that the support for images is very limited within Typest. See
 https://typst.app/docs/reference/visualize/image/ supprted types."
   :group 'org-export-typst
   :type '(alist :key-type (string :tag "Type")
-		            :value-type (regexp :tag "Path")))
+                :value-type (regexp :tag "Path")))
 
 ;; Export
 (org-export-define-backend 'typst
@@ -188,8 +188,8 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
   :menu-entry
   '(?y "Export to Typst"
        ((?F "As Typst buffer" org-typst-export-as-typst)
-	    (?f "As Typst file" org-typst-export-to-typst)
-	    (?p "As PDF file" org-typst-export-to-pdf)))
+            (?f "As Typst file" org-typst-export-to-typst)
+            (?p "As PDF file" org-typst-export-to-pdf)))
   :options-alist
   '((:typst-format-drawer-function nil nil org-typst-format-drawer-function)
     (:typst-format-inlinetask-function nil nil org-typst-format-inlinetask-function)))
@@ -210,8 +210,8 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
 
 (defun org-typst-drawer (drawer contents info)
   (let* ((name (org-element-property :drawer-name drawer))
-	       (output (funcall (plist-get info :typst-format-drawer-function)
-			                    name contents)))
+         (output (funcall (plist-get info :typst-format-drawer-function)
+                          name contents)))
     (org-typst--label output drawer info)))
 
 (defun org-typst-dynamic-block (_dynamic-block contents _info)
@@ -276,17 +276,17 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
 
 (defun org-typst-inlinetask (inlinetask contents info)
   (let ((title (org-export-data (org-element-property :title inlinetask) info))
-	      (todo (and (plist-get info :with-todo-keywords)
-		               (let ((todo (org-element-property :todo-keyword inlinetask)))
-		                 (and todo (org-export-data todo info)))))
-	      (todo-type (org-element-property :todo-type inlinetask))
-	      (tags (and (plist-get info :with-tags)
-		               (org-export-get-tags inlinetask info)))
-	      (priority (and (plist-get info :with-priority)
-		                   (org-element-property :priority inlinetask)))
-	      (contents (org-typst--label contents inlinetask info)))
+        (todo (and (plist-get info :with-todo-keywords)
+                   (let ((todo (org-element-property :todo-keyword inlinetask)))
+                     (and todo (org-export-data todo info)))))
+        (todo-type (org-element-property :todo-type inlinetask))
+        (tags (and (plist-get info :with-tags)
+                   (org-export-get-tags inlinetask info)))
+        (priority (and (plist-get info :with-priority)
+                       (org-element-property :priority inlinetask)))
+        (contents (org-typst--label contents inlinetask info)))
     (funcall (plist-get info :typst-format-inlinetask-function)
-	           todo todo-type priority title tags contents info)))
+             todo todo-type priority title tags contents info)))
 
 (defun org-typst-italic (_italic contents _info)
   (format "#emph[%s]" contents))
@@ -313,15 +313,16 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
      ((string-equal key "TYP") value)
      ((string-equal key "TOC")
       (cond
-	     ((string-match-p "\\<headlines\\>" value)
-	      (let* ((localp (string-match-p "\\<local\\>" value))
-		           (parent (org-element-lineage keyword 'headline))
-		           (level (if (not (and localp parent)) 0
-			                  (org-export-get-relative-level parent info)))
-		           (depth
-		            (and (string-match "\\<[0-9]+\\>" value)
-			               (+ (string-to-number (match-string 0 value)) level))))
-	        (if (and localp parent)
+       ((string-match-p "\\<headlines\\>" value)
+        (let* ((localp (string-match-p "\\<local\\>" value))
+               (parent (org-element-lineage keyword 'headline))
+               (level (if (not (and localp parent))
+                          0
+                        (org-export-get-relative-level parent info)))
+               (depth
+                (and (string-match "\\<[0-9]+\\>" value)
+                     (+ (string-to-number (match-string 0 value)) level))))
+          (if (and localp parent)
               (format "#context {
   let before = query(
     selector(heading).before(here(), inclusive: true),
@@ -354,8 +355,8 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
                 (format "#outline(title: none, depth: %s)" depth)
               "#outline(title: none)"))))
        ((string-match-p "\\<figures\\>" value) "#outline(title: none, target: figure.where(kind: image))")
-	     ((string-match-p "\\<tables\\>" value) "#outline(title: none, target: figure.where(kind: table))")
-	     ((string-match-p "\\<listings\\>" value) "#outline(title: none, target: figure.where(kind: raw))"))))))
+       ((string-match-p "\\<tables\\>" value) "#outline(title: none, target: figure.where(kind: table))")
+       ((string-match-p "\\<listings\\>" value) "#outline(title: none, target: figure.where(kind: raw))"))))))
 
 (defun org-typst-line-break (_line-break _contents _info)
   "#linebreak")
@@ -492,10 +493,10 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
 (defun org-typst-template (contents info)
   (let ((title (plist-get info :title))
         (author (when (plist-get info :with-author)
-			            (plist-get info :author)))
+                  (plist-get info :author)))
         (language (plist-get info :language))
         (email (when (plist-get info :with-email)
-		             (plist-get info :email)))
+                 (plist-get info :email)))
         (toc (plist-get info :with-toc)))
     (concat
      (when (or (car title) author)
@@ -615,26 +616,26 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
     (&optional async subtreep visible-only body-only ext-plist)
   (interactive)
   (org-export-to-buffer 'typst org-typst-export-buffer-name
-    async subtreep visible-only body-only ext-plist
-    ;; TODO: use org-typst-export-buffer-major-mode
-    (when org-typst-export-buffer-major-mode
-      (if (fboundp 'major-mode-remap)
-          (major-mode-remap org-typst-export-buffer-major-mode)
-        org-typst-export-buffer-major-mode))))
+                        async subtreep visible-only body-only ext-plist
+                        ;; TODO: use org-typst-export-buffer-major-mode
+                        (when org-typst-export-buffer-major-mode
+                          (if (fboundp 'major-mode-remap)
+                              (major-mode-remap org-typst-export-buffer-major-mode)
+                            org-typst-export-buffer-major-mode))))
 
 (defun org-typst-export-to-typst
     (&optional async subtreep visible-only body-only ext-plist)
   (interactive)
   (let ((outfile (org-export-output-file-name ".typ" subtreep)))
     (org-export-to-file 'typst outfile
-      async subtreep visible-only body-only ext-plist)))
+                        async subtreep visible-only body-only ext-plist)))
 
 (defun org-typst-export-to-pdf (&optional async subtreep visible-only body-only ext-plist)
   (interactive)
   (let ((outfile (org-export-output-file-name ".typ" subtreep)))
     (org-export-to-file 'typst outfile
-      async subtreep visible-only body-only ext-plist
-      #'org-typst-compile)))
+                        async subtreep visible-only body-only ext-plist
+                        #'org-typst-compile)))
 
 (defun org-typst-compile (typfile &optional snippet)
   (let* ((log-buf-name "*Org PDF Typst Output*")
@@ -645,8 +646,8 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
       (erase-buffer))
 
     (setq outfile (org-compile-file typfile (list process) "pdf"
-				                            (format "See %S for details" log-buf-name)
-				                            log-buf nil))
+                                    (format "See %S for details" log-buf-name)
+                                    log-buf nil))
     outfile))
 
 (require 'oc-typst)
