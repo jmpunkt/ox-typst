@@ -246,7 +246,9 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
     (pcase (org-element-property :type footnote-reference)
       ('standard (format "#footnote(label(%s))" (org-typst--as-string label)))
       ('inline (if label
-                   (format "#footnote[%s] #label(%s)" contents (org-typst--as-string label))
+                   (format "#footnote[%s] #label(%s)"
+                           contents
+                           (org-typst--as-string label))
                  (format "#footnote[%s]" contents)))
       (_ nil))))
 
@@ -354,9 +356,12 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
             (if depth
                 (format "#outline(title: none, depth: %s)" depth)
               "#outline(title: none)"))))
-       ((string-match-p "\\<figures\\>" value) "#outline(title: none, target: figure.where(kind: image))")
-       ((string-match-p "\\<tables\\>" value) "#outline(title: none, target: figure.where(kind: table))")
-       ((string-match-p "\\<listings\\>" value) "#outline(title: none, target: figure.where(kind: raw))"))))))
+       ((string-match-p "\\<figures\\>" value)
+        "#outline(title: none, target: figure.where(kind: image))")
+       ((string-match-p "\\<tables\\>" value)
+        "#outline(title: none, target: figure.where(kind: table))")
+       ((string-match-p "\\<listings\\>" value)
+        "#outline(title: none, target: figure.where(kind: raw))"))))))
 
 (defun org-typst-line-break (_line-break _contents _info)
   "#linebreak")
@@ -367,15 +372,17 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
         ;; to an element inside a headline, we need to point to the headline
         ;; instead. Most of the time this is what you want, but it might not be
         ;; correct.
-        (resolve-headline-friendly (lambda (target) (let ((parent (org-element-parent-element target)))
-                                                      (if (string= (org-element-type parent) "headline")
-                                                          (org-export-get-reference parent info)
-                                                        (org-export-get-reference target info))))))
+        (resolve-headline-friendly (lambda (target)
+                                     (let ((parent (org-element-parent-element target)))
+                                       (if (string= (org-element-type parent) "headline")
+                                           (org-export-get-reference parent info)
+                                         (org-export-get-reference target info))))))
     (cond
      ((org-export-inline-image-p link org-typst-inline-image-rules)
-      (org-typst--figure (format "#image(%s)"
-                                 (org-typst--as-string
-                                  (org-element-property :path (org-export-link-localise link))))
+      (org-typst--figure (format
+                          "#image(%s)"
+                          (org-typst--as-string
+                           (org-element-property :path (org-export-link-localise link))))
                          link
                          info))
      ((equal (org-element-property :type link) "radio")
@@ -386,7 +393,8 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
                 (org-trim contents))))
      ((member (org-element-property :type link) '("custom-id" "id" "fuzzy"))
       (let* ((target (org-export-resolve-link link info))
-             (link-path (org-typst--as-string (funcall resolve-headline-friendly target))))
+             (link-path (org-typst--as-string
+                         (funcall resolve-headline-friendly target))))
         (if contents
             (format "#link(label(%s))[%s]" link-path (org-trim contents))
           (format "#ref(label(%s))" link-path))))
@@ -414,7 +422,8 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
      (mapconcat
       (lambda (item)
         (when (eq (car item) 'item)
-          (let ((marker (cdr (assoc (org-element-property :checkbox item) org-typst-checkbox-symbols)))
+          (let ((marker (cdr (assoc (org-element-property :checkbox item)
+                                    org-typst-checkbox-symbols)))
                 (item-content (org-trim (org-export-data item info))))
             (if marker
                 (format "#list(marker: [%s], list.item[%s])" marker item-content)
@@ -439,7 +448,8 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
     (when contents
       (org-typst--figure
        (format "#quote(block: true%s, %s)"
-               (if attribution (format ", attribution: %s" (org-typst--as-string attribution)) "")
+               (if attribution
+                   (format ", attribution: %s" (org-typst--as-string attribution)) "")
                (org-typst--as-string contents))
        quote-block
        info))))
@@ -510,7 +520,8 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
         ")\n"))
      (when language (format "#set text(lang: \"%s\")\n" language))
      (when toc "#outline()\n")
-     (format "#set heading(numbering: %s)\n" (org-typst--as-string org-typst-heading-numbering))
+     (format "#set heading(numbering: %s)\n"
+             (org-typst--as-string org-typst-heading-numbering))
      contents)))
 
 (defun org-typst-timestamp (timestamp _contents _info)
@@ -540,10 +551,14 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
       (cond
        ((string-match-p "^[ \t]*\$.*\$[ \t]*$" fragment) fragment)
        ((string-match-p "^[ \t]*\\\\(.*\\\\)[ \t]*$" fragment)
-        (replace-regexp-in-string "\\\\)[ \t]*$" "$" (replace-regexp-in-string "^[ \t]*\\\\(" "$" fragment)))
+        (replace-regexp-in-string "\\\\)[ \t]*$" "$"
+                                  (replace-regexp-in-string "^[ \t]*\\\\(" "$" fragment)))
        ((string-match-p "^[ \t]*\\\\\\[.*\\\\\\][ \t]*$" fragment)
-        (replace-regexp-in-string "\\\\\\][ \t]*$" "$" (replace-regexp-in-string "^[ \t]*\\\\\\[" "$" fragment))))))
-   ((eq org-typst-latex-fragment-behavior 'translate) (message "// todo: latex-fragment-translate"))))
+        (replace-regexp-in-string
+         "\\\\\\][ \t]*$" "$"
+         (replace-regexp-in-string "^[ \t]*\\\\\\[" "$" fragment))))))
+   ((eq org-typst-latex-fragment-behavior 'translate)
+    (message "// todo: latex-fragment-translate"))))
 
 ;; Helper
 (defun org-typst--raw (content element info &optional language block)
@@ -564,14 +579,17 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
                    (org-export-get-reference (org-element-parent item) info))))
     (if (and label
              (or (string= (org-element-type item) "headline")
-                 (not (string= (org-element-type (org-element-parent-element item)) "headline"))))
+                 (not (string= (org-element-type (org-element-parent-element item))
+                               "headline"))))
         (format "%s #label(%s)" (or content "") (org-typst--as-string label))
       content)))
 
 (defun org-typst--figure (content element info)
   (let* ((raw (or (org-export-get-caption element)
                   (org-export-get-caption (org-element-parent-element element))))
-         (caption (when raw (mapconcat (lambda (e) (if (stringp e) e (org-export-data e info))) raw))))
+         (caption (when raw
+                    (mapconcat (lambda (e) (if (stringp e) e (org-export-data e info)))
+                               raw))))
     (org-typst--label
      (format "#figure([%s]%s)"
              content
@@ -580,12 +598,16 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
      info)))
 
 (defun org-typst--sections (level)
-  (format "%s" (seq-reduce #'concat (mapcar (lambda (_elm) "=") (number-sequence 1 level)) "")))
+  (format "%s" (seq-reduce #'concat
+                           (mapcar (lambda (_elm) "=") (number-sequence 1 level))
+                           "")))
 
 (defun org-typst--escape (chars string)
   (seq-reduce (lambda (str char)
                 (let ((code (string-to-char char)))
-                  (replace-regexp-in-string (rx-to-string code) (format "\\\\u{%x}" code) str)))
+                  (replace-regexp-in-string (rx-to-string code)
+                                            (format "\\\\u{%x}" code)
+                                            str)))
               chars
               string))
 
@@ -598,7 +620,8 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
 (defun org-typst--language (language)
   (org-typst--as-string
    (or
-    (cdr (seq-find (lambda (pl) (string-equal (car pl) language)) org-typst-language-mapping))
+    (cdr (seq-find (lambda (pl) (string-equal (car pl) language))
+                   org-typst-language-mapping))
     language)))
 
 (defun org-typst--timestamp (timestamp end)
@@ -606,8 +629,12 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
              (month (org-element-property (when end :month-end :month-start) timestamp))
              (day (org-element-property (when end :day-end :day-start) timestamp)))
     (if (org-timestamp-has-time-p timestamp)
-        (when-let ((hour (org-element-property (when end :hour-end :hour-start) timestamp))
-                   (minute (org-element-property (when end :minute-end :minute-start) timestamp)))
+        (when-let ((hour (org-element-property (when end
+                                                 :hour-end :hour-start)
+                                               timestamp))
+                   (minute (org-element-property (when end
+                                                   :minute-end :minute-start)
+                                                 timestamp)))
           (format "#datetime(year: %s, month: %s, day: %s, hour: %s, minute: %s, second: 0).display()" year month day hour minute))
       (format "#datetime(year: %s, month: %s, day: %s).display()" year month day))))
 
