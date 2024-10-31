@@ -3,7 +3,10 @@
 ;; Copyright (C) 2023 Jonas Meurer
 
 ;; Author: Jonas Meurer
-;; Keywords: typst, org-export
+;; Keywords: text, org, typst
+;; URL: https://github.com/jmpunkt/ox-typst
+;; Package-Version: 0.1.0
+;; Package-Requires: ((emacs "29.1") (org "9.7"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -22,6 +25,7 @@
 
 ;;; Commentary:
 ;;
+;; Exports Org files to Typst.  Used with the `org-export-dispatch' command.
 
 ;;; Code:
 
