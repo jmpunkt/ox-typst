@@ -267,7 +267,6 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
      contents)))
 
 (defun org-typst-horizontal-rule (_horizontal-rule _contents _info)
-  ""
   "#line(length: 100%)")
 
 (defun org-typst-inline-src-block (inline-src-block _contents info)
@@ -359,7 +358,6 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
 	     ((string-match-p "\\<listings\\>" value) "#outline(title: none, target: figure.where(kind: raw))"))))))
 
 (defun org-typst-line-break (_line-break _contents _info)
-  ""
   "#linebreak")
 
 (defun org-typst-link (link contents info)
