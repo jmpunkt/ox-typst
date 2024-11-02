@@ -29,10 +29,8 @@
 
 ;;; Code:
 
-(require 'org-macs)
 (require 'ox)
 (require 'org-element)
-
 
 ;; Variables
 

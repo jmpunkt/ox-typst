@@ -25,6 +25,9 @@
 
 (require 'oc)
 
+(declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-typst--as-string "ox-typst" (string))
+
 ;;; Export capability
 (defun org-cite-typst-export-bibliography (_keys files style properties _backend com)
   (let ((dir (file-name-parent-directory (plist-get com :input-file)))
