@@ -1,0 +1,32 @@
+name: ELisp Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  nix-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v30
+      - id: set-matrix
+        name: Generate Nix Matrix
+        run: |
+          set -Eeu
+          echo "matrix=$(nix eval --json '.#githubActions')" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: nix-matrix
+    runs-on: ${{ matrix.image }}
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.nix-matrix.outputs.matrix) }}
+    timeout-minutes: 30 # Safety net in case of hanging executable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v30
+      - name: Run Tests
+        run: nix run --system ${{ matrix.system }} -L --accept-flake-config ".#checks.${{ matrix.system }}.${{ matrix.target }}"
