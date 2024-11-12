@@ -4,3 +4,4 @@
 /examples/**/*.pdf
 *.pdf
 *.html
+*.elc
