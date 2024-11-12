@@ -203,7 +203,7 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
   (message "// todo: org-typst-clock"))
 
 (defun org-typst-code (code _contents info)
-  (when-let ((code-text (org-element-property :value code)))
+  (when-let* ((code-text (org-element-property :value code)))
     (org-typst--raw code-text code info)))
 
 (defun org-typst-drawer (drawer contents info)
@@ -270,8 +270,8 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
   "#line(length: 100%)")
 
 (defun org-typst-inline-src-block (inline-src-block _contents info)
-  (when-let ((code (org-element-property :value inline-src-block))
-             (lang (org-element-property :language inline-src-block)))
+  (when-let* ((code (org-element-property :value inline-src-block))
+              (lang (org-element-property :language inline-src-block)))
     (org-typst--raw code inline-src-block info lang)))
 
 (defun org-typst-inlinetask (inlinetask contents info)
@@ -292,12 +292,12 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
   (format "#emph[%s]" contents))
 
 (defun org-typst-item (item contents info)
-  (when-let ((parent (org-export-get-parent item))
-             (trimmed (org-trim contents)))
+  (when-let* ((parent (org-export-get-parent item))
+              (trimmed (org-trim contents)))
     (pcase (org-element-property :type parent)
       ;; NOTE: unordered list items are all represented as single lists
       ('unordered trimmed)
-      ('ordered (when-let ((bullet-raw (org-element-property :bullet item)))
+      ('ordered (when-let* ((bullet-raw (org-element-property :bullet item)))
                   (when (string-match "\\([0-9]+\\)\." bullet-raw)
                     (format "enum.item(%s)[%s]," (match-string 1 bullet-raw) trimmed))))
       ('descriptive (when-let* ((raw-tag (org-element-property :tag item))
@@ -462,8 +462,8 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
   contents)
 
 (defun org-typst-src-block (src-block _contents info)
-  (when-let ((code (org-element-property :value src-block))
-             (lang (org-element-property :language src-block)))
+  (when-let* ((code (org-element-property :value src-block))
+              (lang (org-element-property :language src-block)))
     (when (org-string-nw-p code)
       (org-typst--raw code src-block info lang t))))
 
@@ -479,7 +479,7 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
   (format "#super[%s]" contents))
 
 (defun org-typst-table (table contents info)
-  (when-let ((columns (cdr (org-export-table-dimensions table info))))
+  (when-let* ((columns (cdr (org-export-table-dimensions table info))))
     (if (eq (org-element-property :type table) 'org)
         ;;org
         (org-typst--figure
@@ -623,16 +623,16 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
     language)))
 
 (defun org-typst--timestamp (timestamp end)
-  (when-let ((year (org-element-property (when end :year-end :year-start) timestamp))
-             (month (org-element-property (when end :month-end :month-start) timestamp))
-             (day (org-element-property (when end :day-end :day-start) timestamp)))
+  (when-let* ((year (org-element-property (when end :year-end :year-start) timestamp))
+              (month (org-element-property (when end :month-end :month-start) timestamp))
+              (day (org-element-property (when end :day-end :day-start) timestamp)))
     (if (org-timestamp-has-time-p timestamp)
-        (when-let ((hour (org-element-property (when end
-                                                 :hour-end :hour-start)
-                                               timestamp))
-                   (minute (org-element-property (when end
-                                                   :minute-end :minute-start)
-                                                 timestamp)))
+        (when-let* ((hour (org-element-property (when end
+                                                  :hour-end :hour-start)
+                                                timestamp))
+                    (minute (org-element-property (when end
+                                                    :minute-end :minute-start)
+                                                  timestamp)))
           (format "#datetime(year: %s, month: %s, day: %s, hour: %s, minute: %s, second: 0).display()" year month day hour minute))
       (format "#datetime(year: %s, month: %s, day: %s).display()" year month day))))
 
