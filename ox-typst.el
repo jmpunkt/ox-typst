@@ -94,7 +94,8 @@ The function should return the string to be exported."
 (defcustom org-typst-latex-fragment-behavior nil
   "Determines how to process LaTeX fragments."
   :type '(choice (const :tag "No processing" nil)
-                 ;; TODO: how to implement translation of LaTeX fragments to Typst?
+                 ;; TODO: how to implement translation of LaTeX fragments to
+                 ;;       Typst?
                  (const :tag "Translate" translate))
   :group 'org-export-typst)
 
@@ -190,7 +191,9 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
             (?p "As PDF file" org-typst-export-to-pdf)))
   :options-alist
   '((:typst-format-drawer-function nil nil org-typst-format-drawer-function)
-    (:typst-format-inlinetask-function nil nil org-typst-format-inlinetask-function)))
+    (:typst-format-inlinetask-function nil
+                                       nil
+                                       org-typst-format-inlinetask-function)))
 
 ;; Transpile
 (defun org-typst-bold (_bold contents _info)
@@ -217,7 +220,8 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
 
 (defun org-typst-entity (entity _contents _info)
   (string-join
-   (seq-map (lambda (c) (format "\\u{%x}" c)) (org-element-property :utf-8 entity))
+   (seq-map (lambda (c) (format "\\u{%x}" c))
+            (org-element-property :utf-8 entity))
    ""))
 
 (defun org-typst-example-block (example-block contents info)
@@ -237,7 +241,8 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
 (defun org-typst-footnote-definition (footnote-definition contents _info)
   (format "#hide[#footnote[%s] #label(%s)]"
           (org-trim contents)
-          (org-typst--as-string (org-element-property :label footnote-definition))))
+          (org-typst--as-string
+           (org-element-property :label footnote-definition))))
 
 (defun org-typst-footnote-reference (footnote-reference contents _info)
   (let ((label (org-element-property :label footnote-reference)))
@@ -252,7 +257,8 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
 
 (defun org-typst-headline (headline contents info)
   (when-let* ((level (org-element-property :level headline))
-              (title (org-export-data (org-element-property :title headline) info))
+              (title (org-export-data (org-element-property :title headline)
+                                      info))
               (label (org-typst--label nil headline info)))
     (concat
      (format "#heading(level: %s%s)"
@@ -299,9 +305,12 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
       ('unordered trimmed)
       ('ordered (when-let* ((bullet-raw (org-element-property :bullet item)))
                   (when (string-match "\\([0-9]+\\)\." bullet-raw)
-                    (format "enum.item(%s)[%s]," (match-string 1 bullet-raw) trimmed))))
+                    (format "enum.item(%s)[%s],"
+                            (match-string 1 bullet-raw)
+                            trimmed))))
       ('descriptive (when-let* ((raw-tag (org-element-property :tag item))
-                                (tag (and raw-tag (org-export-data raw-tag info))))
+                                (tag (and raw-tag
+                                          (org-export-data raw-tag info))))
                       (format "terms.item[%s][%s]," tag trimmed)))
       (_ nil))))
 
@@ -370,17 +379,19 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
         ;; to an element inside a headline, we need to point to the headline
         ;; instead. Most of the time this is what you want, but it might not be
         ;; correct.
-        (resolve-headline-friendly (lambda (target)
-                                     (let ((parent (org-element-parent-element target)))
-                                       (if (string= (org-element-type parent) "headline")
-                                           (org-export-get-reference parent info)
-                                         (org-export-get-reference target info))))))
+        (resolve-headline-friendly
+         (lambda (target)
+           (let ((parent (org-element-parent-element target)))
+             (if (string= (org-element-type parent) "headline")
+                 (org-export-get-reference parent info)
+               (org-export-get-reference target info))))))
     (cond
      ((org-export-inline-image-p link org-typst-inline-image-rules)
       (org-typst--figure (format
                           "#image(%s)"
                           (org-typst--as-string
-                           (org-element-property :path (org-export-link-localise link))))
+                           (org-element-property
+                            :path (org-export-link-localise link))))
                          link
                          info))
      ((equal (org-element-property :type link) "radio")
@@ -424,7 +435,9 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
                                     org-typst-checkbox-symbols)))
                 (item-content (org-trim (org-export-data item info))))
             (if marker
-                (format "#list(marker: [%s], list.item[%s])" marker item-content)
+                (format "#list(marker: [%s], list.item[%s])"
+                        marker
+                        item-content)
               (format "#list(list.item[%s])" item-content)))))
       (cdr plain-list)))
     ('ordered (format "#enum(%s)" contents))
@@ -442,12 +455,17 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
        (org-typst--raw contents property-drawer info)))
 
 (defun org-typst-quote-block (quote-block contents info)
-  (let ((attribution (org-export-read-attribute :attr_typst quote-block :author)))
+  (let ((attribution (org-export-read-attribute
+                      :attr_typst
+                      quote-block
+                      :author)))
     (when contents
       (org-typst--figure
        (format "#quote(block: true%s, %s)"
                (if attribution
-                   (format ", attribution: %s" (org-typst--as-string attribution)) "")
+                   (format ", attribution: %s"
+                           (org-typst--as-string attribution))
+                 "")
                (org-typst--as-string contents))
        quote-block
        info))))
@@ -550,7 +568,9 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
        ((string-match-p "^[ \t]*\$.*\$[ \t]*$" fragment) fragment)
        ((string-match-p "^[ \t]*\\\\(.*\\\\)[ \t]*$" fragment)
         (replace-regexp-in-string "\\\\)[ \t]*$" "$"
-                                  (replace-regexp-in-string "^[ \t]*\\\\(" "$" fragment)))
+                                  (replace-regexp-in-string "^[ \t]*\\\\("
+                                                            "$"
+                                                            fragment)))
        ((string-match-p "^[ \t]*\\\\\\[.*\\\\\\][ \t]*$" fragment)
         (replace-regexp-in-string
          "\\\\\\][ \t]*$" "$"
@@ -577,16 +597,20 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
                    (org-export-get-reference (org-element-parent item) info))))
     (if (and label
              (or (string= (org-element-type item) "headline")
-                 (not (string= (org-element-type (org-element-parent-element item))
+                 (not (string= (org-element-type
+                                (org-element-parent-element item))
                                "headline"))))
         (format "%s #label(%s)" (or content "") (org-typst--as-string label))
       content)))
 
 (defun org-typst--figure (content element info)
   (let* ((raw (or (org-export-get-caption element)
-                  (org-export-get-caption (org-element-parent-element element))))
+                  (org-export-get-caption (org-element-parent-element
+                                           element))))
          (caption (when raw
-                    (mapconcat (lambda (e) (if (stringp e) e (org-export-data e info)))
+                    (mapconcat (lambda (e) (if (stringp e)
+                                               e
+                                             (org-export-data e info)))
                                raw))))
     (org-typst--label
      (format "#figure([%s]%s)"
@@ -597,7 +621,9 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
 
 (defun org-typst--sections (level)
   (format "%s" (seq-reduce #'concat
-                           (mapcar (lambda (_elm) "=") (number-sequence 1 level))
+                           (mapcar
+                            (lambda (_elm) "=")
+                            (number-sequence 1 level))
                            "")))
 
 (defun org-typst--escape (chars string)
@@ -623,18 +649,31 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
     language)))
 
 (defun org-typst--timestamp (timestamp end)
-  (when-let* ((year (org-element-property (when end :year-end :year-start) timestamp))
-              (month (org-element-property (when end :month-end :month-start) timestamp))
-              (day (org-element-property (when end :day-end :day-start) timestamp)))
+  (when-let* ((year (org-element-property
+                     (when end :year-end :year-start)
+                     timestamp))
+              (month (org-element-property
+                      (when end :month-end :month-start)
+                      timestamp))
+              (day (org-element-property
+                    (when end :day-end :day-start)
+                    timestamp)))
     (if (org-timestamp-has-time-p timestamp)
-        (when-let* ((hour (org-element-property (when end
-                                                  :hour-end :hour-start)
+        (when-let* ((hour (org-element-property (when end :hour-end :hour-start)
                                                 timestamp))
                     (minute (org-element-property (when end
                                                     :minute-end :minute-start)
                                                   timestamp)))
-          (format "#datetime(year: %s, month: %s, day: %s, hour: %s, minute: %s, second: 0).display()" year month day hour minute))
-      (format "#datetime(year: %s, month: %s, day: %s).display()" year month day))))
+          (format "#datetime(year: %s, month: %s, day: %s, hour: %s, minute: %s, second: 0).display()"
+                  year
+                  month
+                  day
+                  hour
+                  minute))
+      (format "#datetime(year: %s, month: %s, day: %s).display()"
+              year
+              month
+              day))))
 
 ;; Commands
 (defun org-typst-export-as-typst
@@ -642,10 +681,10 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
   (interactive)
   (org-export-to-buffer 'typst org-typst-export-buffer-name
                         async subtreep visible-only body-only ext-plist
-                        ;; TODO: use org-typst-export-buffer-major-mode
                         (when org-typst-export-buffer-major-mode
                           (if (fboundp 'major-mode-remap)
-                              (major-mode-remap org-typst-export-buffer-major-mode)
+                              (major-mode-remap
+                               org-typst-export-buffer-major-mode)
                             org-typst-export-buffer-major-mode))))
 
 (defun org-typst-export-to-typst
@@ -655,7 +694,8 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
     (org-export-to-file 'typst outfile
                         async subtreep visible-only body-only ext-plist)))
 
-(defun org-typst-export-to-pdf (&optional async subtreep visible-only body-only ext-plist)
+(defun org-typst-export-to-pdf
+    (&optional async subtreep visible-only body-only ext-plist)
   (interactive)
   (let ((outfile (org-export-output-file-name ".typ" subtreep)))
     (org-export-to-file 'typst outfile

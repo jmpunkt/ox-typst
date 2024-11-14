@@ -3,5 +3,5 @@
 
 ((emacs-lisp-mode . ((indent-tabs-mode . nil)
                      (tab-width . 8)
-                     (fill-column . 90)
+                     (fill-column . 80)
                      (sentence-end-double-space . t))))
