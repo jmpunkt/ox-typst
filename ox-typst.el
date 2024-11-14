@@ -760,9 +760,12 @@ Return PDF file name or raise an error if it couldn't be produced."
     (with-current-buffer log-buf
       (erase-buffer))
 
-    (setq outfile (org-compile-file typfile (list process) "pdf"
+    (setq outfile (org-compile-file typfile
+                                    (list process)
+                                    "pdf"
                                     (format "See %S for details" log-buf-name)
-                                    log-buf nil))
+                                    log-buf
+                                    nil))
     outfile))
 
 (require 'oc-typst)
