@@ -744,7 +744,6 @@ Return PDF file's name."
                         async subtreep visible-only body-only ext-plist
                         #'org-typst-compile)))
 
-(defun org-typst-compile (typfile &optional snippet)
 (defun org-typst-compile (typfile)
   "Compile Typst file to PDF.
 
@@ -754,7 +753,7 @@ is redirected to \"*Org PDF Typst Output*\" buffer.
 
 Return PDF file name or raise an error if it couldn't be produced."
   (let* ((log-buf-name "*Org PDF Typst Output*")
-         (log-buf (and (not snippet) (get-buffer-create log-buf-name)))
+         (log-buf (get-buffer-create log-buf-name))
          (process (format "%s c \"%s\"" org-typst-bin typfile))
          outfile)
     (with-current-buffer log-buf
