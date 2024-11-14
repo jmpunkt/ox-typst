@@ -128,7 +128,7 @@ A rule consists in an association whose key is the type of link
 to consider, and value is a regexp that will be matched against
 link's path.
 
-Note that the support for images is very limited within Typest. See
+Note that the support for images is very limited within Typest.  See
 https://typst.app/docs/reference/visualize/image/ supprted types."
   :group 'org-export-typst
   :type '(alist :key-type (string :tag "Type")
@@ -689,6 +689,26 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
 
 (defun org-typst-export-to-typst
     (&optional async subtreep visible-only body-only ext-plist)
+  "Export Org-buffer to Typst.
+
+If narrowing is active in the current buffer, only export its narrowed part.
+
+If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through the
+`org-export-stack' interface.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree at point,
+extracting information from the headline properties first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export contents of hidden
+elements.
+
+BODY-ONLY currently has no effect.  The entire buffer is always exported.
+
+EXT-PLIST, when provided, is a property list with external parameters overriding
+Org default settings, but still inferior to file-local settings."
   (interactive)
   (let ((outfile (org-export-output-file-name ".typ" subtreep)))
     (org-export-to-file 'typst outfile
@@ -696,6 +716,28 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
 
 (defun org-typst-export-to-pdf
     (&optional async subtreep visible-only body-only ext-plist)
+  "Export Org-buffer as PDF using Typst.
+
+If narrowing is active in the current buffer, only export its narrowed part.
+
+If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through the
+`org-export-stack' interface.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree at point,
+extracting information from the headline properties first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export contents of hidden
+elements.
+
+BODY-ONLY currently has no effect.  The entire buffer is always exported.
+
+EXT-PLIST, when provided, is a property list with external parameters overriding
+Org default settings, but still inferior to file-local settings.
+
+Return PDF file's name."
   (interactive)
   (let ((outfile (org-export-output-file-name ".typ" subtreep)))
     (org-export-to-file 'typst outfile
@@ -703,6 +745,14 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
                         #'org-typst-compile)))
 
 (defun org-typst-compile (typfile &optional snippet)
+(defun org-typst-compile (typfile)
+  "Compile Typst file to PDF.
+
+TYPFILE is the name of the file being compiled.  The Typst binary use for the
+compilation is controlled by `org-typst-bin'.  Output of the compilation process
+is redirected to \"*Org PDF Typst Output*\" buffer.
+
+Return PDF file name or raise an error if it couldn't be produced."
   (let* ((log-buf-name "*Org PDF Typst Output*")
          (log-buf (and (not snippet) (get-buffer-create log-buf-name)))
          (process (format "%s c \"%s\"" org-typst-bin typfile))
