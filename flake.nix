@@ -90,20 +90,15 @@
           (org :url "https://git.savannah.gnu.org/git/emacs/org-mode.git" :fetcher git)
         '';
       };
-    buildTestCase = {
-      system,
+
+    buildPackage = {
+      pkgs,
       typst-version,
       org-version,
-      emacs,
+      emacs-version,
     }: let
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = [
-          self.overlays.org-mode
-          self.overlays.typst-bin
-        ];
-      };
       typst-bin = pkgs."typst-${versionToKey typst-version}";
+      emacs = nix-emacs-ci.packages.${pkgs.system}."emacs-${versionToKey emacs-version}";
       emacs-final = (pkgs.emacsPackagesFor emacs).emacsWithPackages (
         epkgs: [
           epkgs.melpaPackages.package-lint
@@ -114,6 +109,18 @@
       load-path = ''
         (add-to-list 'load-path ".")
       '';
+    in
+      pkgs.writeShellScriptBin "emacs" ''
+        export PATH="${typst-bin}/bin/:$PATH"
+        ${emacs-final}/bin/emacs -q --eval ${pkgs.lib.escapeShellArg load-path} "$@"
+      '';
+
+    buildTestCase = {
+      pkgs,
+      typst-version,
+      org-version,
+      emacs-version,
+    }: let
       package-lint-setup = ''
         (progn
           (require 'package-lint)
@@ -126,29 +133,55 @@
       byte-compile-setup = ''
         (setq byte-compile-error-on-warn t)
       '';
+      emacs =
+        self
+        .packages
+        .${pkgs.system}
+        .${
+          versionsToString {
+            inherit typst-version org-version emacs-version;
+          }
+        };
     in
       pkgs.writeShellScriptBin "test-ox-typst.sh" ''
         set -e
-        export PATH="${typst-bin}/bin/:$PATH"
 
         echo -e "\n\n\nPackage lint"
-        ${emacs-final}/bin/emacs -batch --eval ${pkgs.lib.escapeShellArg load-path} --eval ${pkgs.lib.escapeShellArg package-lint-setup} -f package-lint-batch-and-exit ox-typst.el
+        ${emacs}/bin/emacs -batch --eval ${pkgs.lib.escapeShellArg package-lint-setup} -f package-lint-batch-and-exit ox-typst.el
         echo -e "\n\n\nByte compile"
-        ${emacs-final}/bin/emacs -batch --eval ${pkgs.lib.escapeShellArg load-path} --eval ${pkgs.lib.escapeShellArg byte-compile-setup} -f batch-byte-compile *.el
+        ${emacs}/bin/emacs -batch --eval ${pkgs.lib.escapeShellArg byte-compile-setup} -f batch-byte-compile *.el
         echo -e "\n\n\nTests"
-        ${emacs-final}/bin/emacs -batch  --eval ${pkgs.lib.escapeShellArg load-path} -l tests/test.el -f org-typst-test-run
+        ${emacs}/bin/emacs -batch -l tests/test.el -f org-typst-test-run
       '';
-    forAllTests = system:
+
+    versionsToString = {
+      typst-version,
+      org-version,
+      emacs-version,
+    }: "emacs-${versionToKey emacs-version}-org-${versionToKey org-version}-typst-${versionToKey typst-version}";
+
+    forAll = f: system: let
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [
+          self.overlays.org-mode
+          self.overlays.typst-bin
+        ];
+      };
+    in
       lib.mergeAttrsList (
         lib.mapCartesianProduct (
           {
             emacs-version,
             org-version,
             typst-version,
-          }: {
-            "emacs-${versionToKey emacs-version}-org-${versionToKey org-version}-typst-${versionToKey typst-version}" = buildTestCase {
-              inherit typst-version org-version system;
-              emacs = nix-emacs-ci.packages.${system}."emacs-${versionToKey emacs-version}";
+          }: let
+            key = versionsToString {
+              inherit typst-version org-version emacs-version;
+            };
+          in {
+            ${key} = f {
+              inherit typst-version org-version emacs-version pkgs;
             };
           }
         ) {
@@ -158,12 +191,12 @@
         }
       );
   in {
-    forAllVariants = forAllTests;
-    checks = forAllSystems forAllTests;
+    checks = forAllSystems (forAll buildTestCase);
+    packages = forAllSystems (forAll buildPackage);
     githubActions = let
       mappingSystemToTasks =
         builtins.mapAttrs
-        (name: value: (builtins.attrNames value)) (forAllSystems forAllTests);
+        (name: value: (builtins.attrNames value)) (forAllSystems (forAll buildTestCase));
       constructEntry = set: value: {
         image = platformsToGithub.${set.name};
         system = set.name;
