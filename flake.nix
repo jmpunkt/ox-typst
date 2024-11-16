@@ -160,7 +160,7 @@
       emacs-version,
     }: "emacs-${versionToKey emacs-version}-org-${versionToKey org-version}-typst-${versionToKey typst-version}";
 
-    forAll = f: system: let
+    genMatrix = f: system: let
       pkgs = import nixpkgs {
         inherit system;
         overlays = [
@@ -191,12 +191,12 @@
         }
       );
   in {
-    checks = forAllSystems (forAll buildTestCase);
-    packages = forAllSystems (forAll buildPackage);
+    checks = forAllSystems (genMatrix buildTestCase);
+    packages = forAllSystems (genMatrix buildPackage);
     githubActions = let
       mappingSystemToTasks =
         builtins.mapAttrs
-        (name: value: (builtins.attrNames value)) (forAllSystems (forAll buildTestCase));
+        (name: value: (builtins.attrNames value)) (forAllSystems (genMatrix buildTestCase));
       constructEntry = set: value: {
         image = platformsToGithub.${set.name};
         system = set.name;
