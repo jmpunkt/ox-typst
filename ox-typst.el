@@ -63,7 +63,7 @@ Org-Mode.  Instead map the tag to an alternative tag."
   :group 'org-export-typst)
 
 (defcustom org-typst-format-drawer-function (lambda (_ contents) contents)
-  "Function called to format a drawer in LaTeX code.
+  "Function called to format a drawer in Typst code.
 
 The function must accept two parameters:
   NAME      the drawer name, like \"LOGBOOK\"
@@ -76,7 +76,7 @@ The default function simply returns the value of CONTENTS."
   :group 'org-export-typst)
 
 (defcustom org-typst-format-inlinetask-function (lambda (_ contents) contents)
-  "Function called to format an inlinetask in LaTeX code.
+  "Function called to format an inlinetask in Typst code.
 
 The function must accept seven parameters:
   TODO      the todo keyword (string or nil)
