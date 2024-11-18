@@ -580,6 +580,13 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
 
 ;; Helper
 (defun org-typst--raw (content element info &optional language block)
+  "Wrap CONTENT in a raw Typst block.
+
+If BLOCK is not nil, then content will additionally wrapped in a figure with the
+arguments of ELEMENT and INFO.
+
+LANGUAGE is the language of the code block and will be used as the `language`
+argument in Typst."
   (when content
     (let ((raw (format "#raw(block: %s, %s%s)"
                        (if block "true" "false")
@@ -593,6 +600,13 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
         raw))))
 
 (defun org-typst--label (content item info)
+  "Wrap ITEM and its CONTENT in a Typst label.
+
+If ITEM is inside a headline or Org has no reference to it, then CONTENT is
+returned without being wrapped.  All elements inside the headline are referenced
+through the headline.
+
+INFO is required to determine the reference of ITEM."
   (let ((label (or (org-export-get-reference item info)
                    (org-export-get-reference (org-element-parent item) info))))
     (if (and label
@@ -604,6 +618,11 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
       content)))
 
 (defun org-typst--figure (content element info)
+  "Wrap ELEMENT and its CONTENT in a Typst figure.
+
+Retrieves the caption from the ELEMENT itself or its parent.
+
+INFO is required to determine the reference of ITEM."
   (let* ((raw (or (org-export-get-caption element)
                   (org-export-get-caption (org-element-parent-element
                                            element))))
@@ -627,6 +646,9 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
                            "")))
 
 (defun org-typst--escape (chars string)
+  "Escape CHARS in STRING with unicode.
+
+The resulting string will contain a \\u{XXXX} for every char specified in CHARS."
   (seq-reduce (lambda (str char)
                 (let ((code (string-to-char char)))
                   (replace-regexp-in-string (rx-to-string code)
@@ -636,12 +658,20 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
               string))
 
 (defun org-typst--as-string (string)
+  "Construct Typst string with content STRING.
+
+The STRING will escape every occurrence of `\"'."
   (when string
     (concat "\""
             (org-trim (org-typst--escape '("\"") string))
             "\"")))
 
 (defun org-typst--language (language)
+  "Determine the language for source blocks.
+
+The user can define the mapping `org-typst-language-mapping', to rename the
+languages. If the language is not defined in the mapping, then it is
+returned. Otherwise, the mapped language is returned."
   (org-typst--as-string
    (or
     (cdr (seq-find (lambda (pl) (string-equal (car pl) language))
@@ -649,6 +679,10 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
     language)))
 
 (defun org-typst--timestamp (timestamp end)
+  "Construct Typst timestamp from TIMESTAMP.
+
+Setting END to non-nil extracts the end range of the timestamp. Otherwise, the
+start range of the timestamp is extracted."
   (when-let* ((year (org-element-property
                      (when end :year-end :year-start)
                      timestamp))
