@@ -1,0 +1,4 @@
+#+MACRO: color-blue @@typst:#text(fill: blue)[$1]@@
+
+* Export Snippet
+We use a macro to color the following sentence. {{{color-blue(This text is colored in blue.)}}}
