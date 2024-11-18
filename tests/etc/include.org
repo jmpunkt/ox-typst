@@ -1,0 +1,5 @@
+
+#+INCLUDE: "./fixed.org" :only-contents t
+
+* Section
+The previous section should contain a fixed width element.
