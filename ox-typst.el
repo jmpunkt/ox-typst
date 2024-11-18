@@ -638,13 +638,6 @@ INFO is required to determine the reference of ITEM."
      element
      info)))
 
-(defun org-typst--sections (level)
-  (format "%s" (seq-reduce #'concat
-                           (mapcar
-                            (lambda (_elm) "=")
-                            (number-sequence 1 level))
-                           "")))
-
 (defun org-typst--escape (chars string)
   "Escape CHARS in STRING with unicode.
 
