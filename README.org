@@ -113,6 +113,6 @@ emacs --batch -l tests/test.el -f test/run
 **** With Emacs
 
 It is also possible to use these functions inside Emacs. Navigate to the
-=tests/test.el= file and run =eval-buffer=. The =ox-typst.el= and =oc-typst.el=
-are automatically re-loaded from the current Git repository when evaluating the
+=tests/test.el= file and run =eval-buffer=. The =ox-typst.el= file is
+automatically re-loaded from the current Git repository when evaluating the test
 buffer.

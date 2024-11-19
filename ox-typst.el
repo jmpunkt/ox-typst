@@ -821,7 +821,29 @@ Return PDF file name or raise an error if it couldn't be produced."
                                     nil))
     outfile))
 
-(require 'oc-typst)
+;; Citation Exporter
+(defun org-cite-typst-export-bibliography (_keys files style properties _backend com)
+  (let ((dir (file-name-parent-directory (plist-get com :input-file)))
+        (title (plist-get properties :title)))
+    (format "#bibliography(%s%s(%s))"
+            (and style (format "style: \"%s\", " style))
+            (if title (format "title: %s, " (org-typst--as-string title)) "")
+            (mapconcat (lambda (f) (org-typst--as-string (file-relative-name f dir)))
+                       files
+                       ", "))))
+
+(defun org-cite-typst-export-citation (citation style _ _info)
+  (let ((references (org-cite-get-references citation)))
+    (format "#cite(label(%s)%s)"
+            (mapconcat (lambda (r) (org-typst--as-string (org-element-property :key r)))
+                       references
+                       ", ")
+            (or (and (car style) (format ", style: \"%s\"" (car style)))  ""))))
+
+;; Register `typst' processor
+(org-cite-register-processor 'typst
+                             :export-bibliography #'org-cite-typst-export-bibliography
+                             :export-citation #'org-cite-typst-export-citation)
 
 (provide 'ox-typst)
 ;;; ox-typst.el ends here
