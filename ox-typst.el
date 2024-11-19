@@ -562,7 +562,7 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
 
 (defun org-typst-latex-fragment (latex-fragment _contents _info)
   (cond
-   ((eq org-typst-latex-fragment-behavior nil)
+   ((not org-typst-latex-fragment-behavior)
     (let ((fragment (org-element-property :value latex-fragment)))
       (cond
        ((string-match-p "^[ \t]*\$.*\$[ \t]*$" fragment) fragment)
