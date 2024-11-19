@@ -101,13 +101,13 @@ expectation, the newly generated files become the new golden output.
 **** Generate
 
 #+BEGIN_SRC org
-emacs --batch -l tests/test.el -f test/generate
+emacs --batch -l tests/test.el -f org-typst-test-generate
 #+END_SRC
 
 **** Run
 
 #+BEGIN_SRC org
-emacs --batch -l tests/test.el -f test/run
+emacs --batch -l tests/test.el -f org-typst-test-run
 #+END_SRC
 
 **** With Emacs
