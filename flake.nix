@@ -124,6 +124,7 @@
       package-lint-setup = ''
         (progn
           (require 'package-lint)
+          (setq package-lint-main-file "ox-typst.el")
           (require 'finder)
           ;; These keywords do not exists and we know that. So we just ignore
           ;; this lint for the following keywords.
@@ -147,7 +148,7 @@
         set -e
 
         echo -e "\n\n\nPackage lint"
-        ${emacs}/bin/emacs -batch --eval ${pkgs.lib.escapeShellArg package-lint-setup} -f package-lint-batch-and-exit ox-typst.el
+        ${emacs}/bin/emacs -batch --eval ${pkgs.lib.escapeShellArg package-lint-setup} -f package-lint-batch-and-exit *.el
         echo -e "\n\n\nByte compile"
         ${emacs}/bin/emacs -batch --eval ${pkgs.lib.escapeShellArg byte-compile-setup} -f batch-byte-compile *.el
         echo -e "\n\n\nTests"
