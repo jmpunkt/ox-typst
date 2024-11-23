@@ -639,7 +639,7 @@ INFO is required to determine the reference of ITEM."
      info)))
 
 (defun org-typst--escape (chars string)
-  "Escape CHARS in STRING with unicode.
+  "Escape CHARS in STRING with corresponding Unicode.
 
 The resulting string will contain a \\u{XXXX} for every char specified in CHARS."
   (seq-reduce (lambda (str char)
@@ -660,11 +660,11 @@ The STRING will escape every occurrence of `\"'."
             "\"")))
 
 (defun org-typst--language (language)
-  "Determine the language for source blocks.
+  "Map Org LANGUAGE to Typst language for source blocks.
 
 The user can define the mapping `org-typst-language-mapping', to rename the
-languages. If the language is not defined in the mapping, then it is
-returned. Otherwise, the mapped language is returned."
+languages.  If the language is not defined in the mapping, then it is
+returned.  Otherwise, the mapped language is returned."
   (org-typst--as-string
    (or
     (cdr (seq-find (lambda (pl) (string-equal (car pl) language))
@@ -674,7 +674,7 @@ returned. Otherwise, the mapped language is returned."
 (defun org-typst--timestamp (timestamp end)
   "Construct Typst timestamp from TIMESTAMP.
 
-Setting END to non-nil extracts the end range of the timestamp. Otherwise, the
+Setting END to non-nil extracts the end range of the timestamp.  Otherwise, the
 start range of the timestamp is extracted."
   (when-let* ((year (org-element-property
                      (when end :year-end :year-start)
