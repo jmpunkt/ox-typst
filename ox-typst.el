@@ -1,6 +1,6 @@
 ;;; ox-typst.el --- Typst Back-End for Org Export Engine -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2023 Jonas Meurer
+;; Copyright (C) 2023-2024 Jonas Meurer
 
 ;; Author: Jonas Meurer
 ;; Keywords: text, wp, org, typst
