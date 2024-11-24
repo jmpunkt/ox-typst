@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023 Jonas Meurer
 
 ;; Author: Jonas Meurer
-;; Keywords: text, org, typst
+;; Keywords: text, wp, org, typst
 ;; URL: https://github.com/jmpunkt/ox-typst
 ;; Package-Version: 0.1.0
 ;; Package-Requires: ((emacs "29.1") (org "9.7"))
