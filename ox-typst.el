@@ -34,8 +34,15 @@
 
 ;; Variables
 
-(defcustom org-typst-bin "typst"
-  "Path or name of Typst binary."
+(defcustom org-typst-process "typst c \"%s\""
+  "Format string for the command to process a Typst file to a PDF file.
+
+The string is formatted with the file path of the Typst file.  The resulting
+string must be a valid shell command, including a program name or a valid file
+path to a Typst binary.  It is recommended to put the file path in quotes,
+like the default value does.
+
+Check the documentation of your Typst version for supported arguments."
   :type 'string
   :group 'org-typst-export)
 
@@ -801,14 +808,14 @@ Return PDF file's name."
 (defun org-typst-compile (typfile)
   "Compile Typst file to PDF.
 
-TYPFILE is the name of the file being compiled.  The Typst binary use for the
-compilation is controlled by `org-typst-bin'.  Output of the compilation process
-is redirected to \"*Org PDF Typst Output*\" buffer.
+TYPFILE is the name of the file being compiled.  The Typst command for the
+compilation is controlled by `org-typst-process'.  Output of the compilation 
+process is redirected to \"*Org PDF Typst Output*\" buffer.
 
 Return PDF file name or raise an error if it couldn't be produced."
   (let* ((log-buf-name "*Org PDF Typst Output*")
          (log-buf (get-buffer-create log-buf-name))
-         (process (format "%s c \"%s\"" org-typst-bin typfile))
+         (process (format org-typst-process typfile))
          outfile)
     (with-current-buffer log-buf
       (erase-buffer))
