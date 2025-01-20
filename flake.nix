@@ -112,6 +112,7 @@
     in
       pkgs.writeShellScriptBin "emacs" ''
         export PATH="${typst-bin}/bin/:$PATH"
+        export PATH="${pkgs.pandoc}/bin/:$PATH"
         ${emacs-final}/bin/emacs -q --eval ${pkgs.lib.escapeShellArg load-path} "$@"
       '';
 

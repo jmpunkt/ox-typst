@@ -1,0 +1,5 @@
+* Dollar Is Not Escaped
+
+Some inline math $x \neq y$.
+
+Some dollar sign $.

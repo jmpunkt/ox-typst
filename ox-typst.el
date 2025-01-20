@@ -98,14 +98,6 @@ The function should return the string to be exported."
   :type 'function
   :group 'org-export-typst)
 
-(defcustom org-typst-latex-fragment-behavior nil
-  "Determines how to process LaTeX fragments."
-  :type '(choice (const :tag "No processing" nil)
-                 ;; TODO: how to implement translation of LaTeX fragments to
-                 ;;       Typst?
-                 (const :tag "Translate" translate))
-  :group 'org-export-typst)
-
 (defcustom org-typst-export-buffer-major-mode nil
   "Set the major-mode for buffer created by Org export.
 
@@ -140,6 +132,22 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
   :group 'org-export-typst
   :type '(alist :key-type (string :tag "Type")
                 :value-type (regexp :tag "Path")))
+
+(defcustom org-typst-from-latex-fragment #'org-typst-from-latex-with-naive
+  "Defines the way the Typst transforms LaTeX fragments into Typst code.
+
+If `nil', then the all LaTeX fragment will be ignored. Otherwise, the provided
+function is called with a single argument, the raw LaTeX fragment as a string."
+  :type 'function
+  :group 'org-export-typst)
+
+(defcustom org-typst-from-latex-environment #'org-typst-from-latex-with-naive
+  "Defines the way the Typst transforms LaTeX fragments into Typst code.
+
+See `org-typst-latex-fragment' for documentation. Has the same behavior, except
+it is used to translate LaTeX environments instead of fragments."
+  :type 'function
+  :group 'org-export-typst)
 
 ;; Export
 (org-export-define-backend 'typst
@@ -235,6 +243,7 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
   (org-typst--raw contents example-block info nil t))
 
 (defun org-typst-export-block (export-block _contents _info)
+  (message "%s" (org-element-property :type export-block))
   (when (member (org-element-property :type export-block) '("TYPST" "TYP"))
     (org-remove-indentation (org-element-property :value export-block))))
 
@@ -564,26 +573,17 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
 (defun org-typst-verse-block (verse-block contents info)
   (org-typst--raw contents verse-block info nil t))
 
-(defun org-typst-latex-environment (_latex-environment _contents _info)
-  (message "// todo: org-typst-latex-environment"))
+(defun org-typst-latex-environment (latex-environment _contents _info)
+  (when org-typst-from-latex-environment
+    (funcall
+     org-typst-from-latex-environment
+     (org-element-property :value latex-environment))))
 
 (defun org-typst-latex-fragment (latex-fragment _contents _info)
-  (cond
-   ((not org-typst-latex-fragment-behavior)
-    (let ((fragment (org-element-property :value latex-fragment)))
-      (cond
-       ((string-match-p "^[ \t]*\$.*\$[ \t]*$" fragment) fragment)
-       ((string-match-p "^[ \t]*\\\\(.*\\\\)[ \t]*$" fragment)
-        (replace-regexp-in-string "\\\\)[ \t]*$" "$"
-                                  (replace-regexp-in-string "^[ \t]*\\\\("
-                                                            "$"
-                                                            fragment)))
-       ((string-match-p "^[ \t]*\\\\\\[.*\\\\\\][ \t]*$" fragment)
-        (replace-regexp-in-string
-         "\\\\\\][ \t]*$" "$"
-         (replace-regexp-in-string "^[ \t]*\\\\\\[" "$" fragment))))))
-   ((eq org-typst-latex-fragment-behavior 'translate)
-    (message "// todo: latex-fragment-translate"))))
+  (when org-typst-from-latex-fragment
+    (funcall
+     org-typst-from-latex-fragment
+     (org-element-property :value latex-fragment))))
 
 ;; Helper
 (defun org-typst--raw (content element info &optional language block)
@@ -708,6 +708,40 @@ start range of the timestamp is extracted."
               year
               month
               day))))
+
+(defun org-typst-from-latex-with-pandoc (latex-fragment)
+  "Convert a LaTeX fragment into a Typst expression using Pandoc."
+  (with-temp-buffer
+    (insert latex-fragment)
+    (call-shell-region
+     (point-min)
+     (point-max)
+     "pandoc -f latex -t typst -"
+     t
+     (current-buffer))
+    (string-trim-right
+     (buffer-substring-no-properties (point-min) (point-max)))))
+
+(defun org-typst-from-latex-with-naive (latex-fragment)
+  "Convert a LaTeX fragment into Typst code.
+
+This approach is very naive and assumes that the provided LaTeX fragment has the
+same inner syntax as Typst. For more complex fragments, use a different
+converter.
+
+The advantage of this convert is the availability in Emacs without additional
+dependencies. Other converts rely on external dependencies."
+  (cond
+   ((string-match-p "^[ \t]*\$.*\$[ \t]*$" latex-fragment) latex-fragment)
+   ((string-match-p "^[ \t]*\\\\(.*\\\\)[ \t]*$" latex-fragment)
+    (replace-regexp-in-string "\\\\)[ \t]*$" "$"
+                              (replace-regexp-in-string "^[ \t]*\\\\("
+                                                        "$"
+                                                        latex-fragment)))
+   ((string-match-p "^[ \t]*\\\\\\[.*\\\\\\][ \t]*$" latex-fragment)
+    (replace-regexp-in-string
+     "\\\\\\][ \t]*$" "$"
+     (replace-regexp-in-string "^[ \t]*\\\\\\[" "$" latex-fragment)))))
 
 ;; Commands
 (defun org-typst-export-as-typst
