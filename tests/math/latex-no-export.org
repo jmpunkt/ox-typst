@@ -1,0 +1,13 @@
+#+BIND: org-typst-from-latex-fragment nil
+#+BIND: org-typst-from-latex-environment nil
+
+* Math (no export)
+
+\begin{equation}                        % arbitrary environments,
+x=\sqrt{b}                              % even tables, figures, etc
+\end{equation}
+
+This is inline Math, but there is nothing here. $a^2=b$. The following two
+statements are not there either, strange.
+
+\( a + b \) \[ a=-2 \]

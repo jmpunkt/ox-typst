@@ -1,4 +1,7 @@
-* Math
+#+BIND: org-typst-from-latex-fragment org-typst-from-latex-with-pandoc
+#+BIND: org-typst-from-latex-environment org-typst-from-latex-with-pandoc
+
+* Math (pandoc)
 
 \begin{equation}                        % arbitrary environments,
 x=\sqrt{b}                              % even tables, figures, etc

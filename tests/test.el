@@ -3,6 +3,9 @@
 
 (load (file-name-concat (vc-git-root default-directory) "ox-typst.el"))
 
+;; Required by math tests
+(setq org-export-allow-bind-keywords t)
+
 (defvar org-typst-test--tests-failed 0)
 (defvar org-typst-test--tests-skipped 0)
 (defvar org-typst-test--tests-succeeded 0)

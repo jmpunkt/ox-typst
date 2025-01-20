@@ -64,13 +64,40 @@ style argument (like =bibliography("./test.bib", style: "apa")=).
 
 ** Math
 
-Currently LaTeX math snippets are not supported. It is currently not possible
-for us to translate these elements into Typst code.
+Org-mode provides a built-in syntax for LaTeX math. However, Typst uses a
+different syntax for math. The syntax of these two modes is incompatible.
 
-Mabye we should one of the following projects for that:
+As a user you have two options: use LaTeX syntax and convert it, or use Typst
+syntax. By setting =org-typst-from-latex-fragment= and
+=org-typst-from-latex-environment= you can control how the Org elements are
+translated. For now, you have to choose between either of them. Mixing them
+throughout the document is not possible.
 
-- https://github.com/msakuta/latypst :: Translate LaTeX snippets to roughly equivalent Typst snippets
-- https://github.com/mitex-rs/mitex :: Emulate LaTeX inside Typst
+For Typst syntax it is best to set these to =#'org-typst-from-latex-with-naive=.
+
+#+BEGIN_SRC elisp
+  (setq org-typst-from-latex-environment #'org-typst-from-latex-with-naive
+        org-typst-from-latex-fragment #'org-typst-from-latex-with-naive)
+#+END_SRC
+
+When you are using the LaTeX syntax, you will need Pandoc to convert the syntax
+to Typst.
+
+#+BEGIN_SRC elisp
+  (setq org-typst-from-latex-environment #'org-typst-from-latex-with-pandoc
+        org-typst-from-latex-fragment #'org-typst-from-latex-with-pandoc)
+#+END_SRC
+
+If none of these methods work for you, then you can always provide your own
+translation functions.
+
+You can also take a look at the files in =tests/math/= to get an idea on how to
+use this functionality. Notice, that in order to use =BIND= you have to enable
+it in Org.
+
+#+BEGIN_SRC elisp
+  (setq org-export-allow-bind-keywords t)
+#+END_SRC
 
 ** Examples
 
