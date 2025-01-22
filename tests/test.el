@@ -126,23 +126,8 @@
                                           (buffer-substring-no-properties (point-min) (point-max))))
                                'success
                              'fail)
-                           (lambda () (diff-buffers typst-buffer typst-new-buffer)))))))
-
-              (result-compile
-               (if (not (file-exists-p typst-file))
-                   (list 'skip nil)
-                 (let* ((typst-output-buffer (format "*Output Typst %s*"
-                                                     (file-name-sans-extension org-file)))
-                        (exit-code (shell-command (format "typst c '%s'"
-                                                          (expand-file-name typst-file))
-                                                  (progn (when (get-buffer typst-output-buffer)
-                                                           (kill-buffer typst-output-buffer))
-                                                         typst-output-buffer))))
-                   (list (if (zerop exit-code) 'success 'fail)
-                         (lambda () (switch-to-buffer (get-buffer-create typst-output-buffer))))))))
-          (org-typst-test--report org-file (list
-                                            (cons "Transpile to Typst" result-transpile)
-                                            (cons "Compile Typst File" result-compile))))))
+                           (lambda () (diff-buffers typst-buffer typst-new-buffer))))))))
+          (org-typst-test--report org-file (list (cons "Transpile to Typst" result-transpile))))))
     (switch-to-buffer org-typst-test--report-buffer)
     (goto-char (point-max))
     (insert (format "\nTests: %d\nSucceeded: %d\nSkipped: %d\nFailed: %d\n"

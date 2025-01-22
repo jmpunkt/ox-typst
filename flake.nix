@@ -70,6 +70,7 @@
           install $src/typst $out/bin/
         '';
       };
+
     buildOrg = {
       writeText,
       melpaBuild,
@@ -93,11 +94,9 @@
 
     buildPackage = {
       pkgs,
-      typst-version,
       org-version,
       emacs-version,
     }: let
-      typst-bin = pkgs."typst-${versionToKey typst-version}";
       emacs = nix-emacs-ci.packages.${pkgs.system}."emacs-${versionToKey emacs-version}";
       emacs-final = (pkgs.emacsPackagesFor emacs).emacsWithPackages (
         epkgs: [
@@ -111,14 +110,35 @@
       '';
     in
       pkgs.writeShellScriptBin "emacs" ''
-        export PATH="${typst-bin}/bin/:$PATH"
+        export PATH="${pkgs.typst}/bin/:$PATH"
         export PATH="${pkgs.pandoc}/bin/:$PATH"
         ${emacs-final}/bin/emacs -q --eval ${pkgs.lib.escapeShellArg load-path} "$@"
       '';
 
-    buildTestCase = {
+    buildTypstTestCase = {
       pkgs,
       typst-version,
+    }:
+      pkgs.writeShellScriptBin "test-typst.sh" ''
+        set -e
+        # for all org files in test dir
+        for file in $(find tests -name "*.org"); do
+          # remove extension of file and replace with typ
+          typ_file=$(echo $file | sed 's/\.org$/.typ/')
+
+          if [ ! -f $typ_file ]; then
+            echo "Skipping $file"
+            continue
+          fi
+
+          echo "Compiling $typ_file"
+          # compile the typ file
+          ${pkgs."typst-${versionToKey typst-version}"}/bin/typst c $typ_file
+        done
+      '';
+
+    buildElispTestCase = {
+      pkgs,
       org-version,
       emacs-version,
     }: let
@@ -141,11 +161,11 @@
         .${pkgs.system}
         .${
           versionsToString {
-            inherit typst-version org-version emacs-version;
+            inherit org-version emacs-version;
           }
         };
     in
-      pkgs.writeShellScriptBin "test-ox-typst.sh" ''
+      pkgs.writeShellScriptBin "test-elisp.sh" ''
         set -e
 
         echo -e "\n\n\nPackage lint"
@@ -157,48 +177,63 @@
       '';
 
     versionsToString = {
-      typst-version,
       org-version,
       emacs-version,
-    }: "emacs-${versionToKey emacs-version}-org-${versionToKey org-version}-typst-${versionToKey typst-version}";
+    }: "emacs-${versionToKey emacs-version}-org-${versionToKey org-version}";
 
-    genMatrix = f: system: let
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = [
-          self.overlays.org-mode
-          self.overlays.typst-bin
-        ];
-      };
-    in
+    typstMatrix = pkgs:
+      builtins.foldl'
+      (a: b: a // b)
+      {}
+      (map (
+          typst-version: {
+            "typst-${versionToKey typst-version}" = buildTypstTestCase {
+              inherit typst-version pkgs;
+            };
+          }
+        )
+        typst-versions);
+
+    elispMatrix = f: pkgs:
       lib.mergeAttrsList (
         lib.mapCartesianProduct (
           {
             emacs-version,
             org-version,
-            typst-version,
           }: let
             key = versionsToString {
-              inherit typst-version org-version emacs-version;
+              inherit org-version emacs-version;
             };
           in {
             ${key} = f {
-              inherit typst-version org-version emacs-version pkgs;
+              inherit org-version emacs-version pkgs;
             };
           }
         ) {
           emacs-version = emacs-versions;
           org-version = org-versions;
-          typst-version = typst-versions;
         }
       );
+
+    testMatrix = system: let
+      pkgs = self.legacyPackages.${system};
+    in
+      (elispMatrix buildElispTestCase pkgs) // (typstMatrix pkgs);
   in {
-    checks = forAllSystems (genMatrix buildTestCase);
-    packages = forAllSystems (genMatrix buildPackage);
+    checks = forAllSystems testMatrix;
+    legacyPackages = forAllSystems (system:
+      import nixpkgs {
+        inherit system;
+        overlays = [
+          self.overlays.typst-bin
+          self.overlays.org-mode
+        ];
+      });
+    packages = forAllSystems (system: elispMatrix buildPackage self.legacyPackages.${system});
     githubActions = let
       mappingSystemToTasks =
         builtins.mapAttrs
-        (name: value: (builtins.attrNames value)) (forAllSystems (genMatrix buildTestCase));
+        (name: value: (builtins.attrNames value)) (forAllSystems testMatrix);
       constructEntry = set: value: {
         image = platformsToGithub.${set.name};
         system = set.name;
