@@ -149,6 +149,20 @@ it is used to translate LaTeX environments instead of fragments."
   :type 'function
   :group 'org-export-typst)
 
+(defcustom org-typst-src-apply-theme-color nil
+  "Specify the behavior for applying custom theme colors to src-bocks.
+
+When providing a custom theme through `org-typst-src-themes', the foreground and
+background colors are ignored by Typst.  According to the documentation, the
+user has to apply these colors by them self.  Setting this variable accordingly,
+will result in `ox-typst' to apply the colors to the code block."
+  :type '(choice
+          (const :tag "None" nil)
+          (const :tag "Foreground only" foreground)
+          (const :tag "Background only" background)
+          (const :tag "Both" t))
+  :group 'org-export-typst)
+
 ;; Export
 (org-export-define-backend 'typst
   '((bold . org-typst-bold)
@@ -243,7 +257,6 @@ it is used to translate LaTeX environments instead of fragments."
   (org-typst--raw contents example-block info nil t))
 
 (defun org-typst-export-block (export-block _contents _info)
-  (message "%s" (org-element-property :type export-block))
   (when (member (org-element-property :type export-block) '("TYPST" "TYP"))
     (org-remove-indentation (org-element-property :value export-block))))
 
@@ -586,25 +599,246 @@ it is used to translate LaTeX environments instead of fragments."
      (org-element-property :value latex-fragment))))
 
 ;; Helper
-(defun org-typst--raw (content element info &optional language block)
+(defun org-typst--collect-text-faces (text new-major-mode)
+  "Collect the faces and its position of a TEXT in its NEW-MAJOR-MODE.
+
+The return value is a list which contains the text as lines.  Each line consists
+of one more elements which compose the text.  These elements have the form
+`(START FACE END)'."
+  (with-temp-buffer
+    (funcall new-major-mode)
+    (insert text)
+    (goto-char (point-min))
+    (when (not (equal major-mode new-major-mode))
+      (error "Could not turn on major mode `%s', enabled major mode `%s'" new-major-mode major-mode))
+    (font-lock-ensure)
+    (let ((lines nil)
+          (current-line nil)
+          (line-number 1))
+      (while (not (eobp))
+        (let ((start (point))
+              (face (plist-get (text-properties-at (point)) 'face))
+              (end (goto-char (min (line-end-position)
+                                   (or (next-property-change (point))
+                                       (point-max))))))
+          (push (list start face end) current-line)
+          (when (equal end (line-end-position))
+            (push (seq-reverse current-line) lines)
+            (setq line-number (1+ line-number)
+                  current-line nil)
+            (when (not (eobp))
+              (forward-char)))))
+      lines)))
+
+(defun org-typst--face-get-attr (face attribute)
+  "Return the ATTRIBUTE of the corresponding FACE.
+
+If an attribute is unspecified on and the face inherits from another face, then
+the value of the inherit face is used.  This continues until a face does not
+inherits from another face."
+  (let* ((preferred-value (face-attribute face attribute))
+         (fallback-value (when (equal preferred-value 'unspecified)
+                           (let ((inherit (face-attribute face :inherit)))
+                             (when (and inherit (not (equal inherit 'unspecified)))
+                             (org-typst--face-get-attr inherit attribute))))))
+    (if (equal preferred-value 'unspecified)
+        (if (equal fallback-value 'unspecified)
+            nil
+          fallback-value)
+      preferred-value)))
+
+(defun org-typst--text-and-face-into-typst (text face)
+  "Convert a TEXT with style of FACE into Typst code."
+  (let* ((foreground (org-typst--face-get-attr face :foreground))
+         (underline (org-typst--face-get-attr face :underline))
+         (overline (org-typst--face-get-attr face :overline))
+         (slant (org-typst--face-get-attr face :slant))
+         (weight (org-typst--face-get-attr face :weight))
+         (strike-through (org-typst--face-get-attr face :strike-through))
+         (underline-fn (lambda (content) (if underline (concat "#underline[" content "]" ) content)))
+         (overline-fn (lambda (content) (if overline (concat "#overline["  content "]") content)))
+         (strike-through-fn (lambda (content) (if strike-through (concat "#strike[" content "]") content))))
+    (seq-reduce
+     (lambda (content fn) (funcall fn content))
+     (list underline-fn overline-fn strike-through-fn)
+     (concat
+      "#text("
+      (when foreground (concat "fill: " (org-typst--as-color foreground) ","))
+      (when weight (concat "weight: " (org-typst--as-string weight) ","))
+      (when slant (concat "style: "
+                          (org-typst--as-string
+                           ;; slant can be 'italic, 'oblique, or 'roman
+                           (if (string-equal slant 'roman) "normal"
+                             slant))
+                          ","))
+      (org-typst--as-string text)
+      ")"))))
+
+(defun org-typst--engrave-code (text new-major-mode)
+  "Convert a TEXT with its NEW-MAJOR-MODE into a Typst code."
+  (let* ((lines (seq-map (lambda (elements)
+                           (seq-reduce (lambda (acc element)
+                                         (concat acc
+                                                 (let* ((start (car element))
+                                                        (face (cadr element))
+                                                        (end (caddr element))
+                                                        (text (substring text (1- start) (1- end))))
+                                                   (concat "\n"
+                                                           (if face
+                                                               (concat "[" (org-typst--text-and-face-into-typst text face) "]")
+                                                             (org-typst--as-string text t))))))
+                                       elements
+                                       ""))
+                         (org-typst--collect-text-faces text new-major-mode))))
+    (format "show raw.line: it => { %s }"
+            (apply
+             #'concat
+             (cl-loop for line in (seq-reverse lines)
+                      for line-number from 1
+                      collect (format "\nif it.number == %s { %s }" line-number line))))))
+
+
+(defun org-typst--raw (content element info &optional raw-language block)
   "Wrap CONTENT in a raw Typst block.
 
 If BLOCK is not nil, then content will additionally wrapped in a figure with the
 arguments of ELEMENT and INFO.
 
-LANGUAGE is the language of the code block and will be used as the `language`
-argument in Typst."
+RAW-LANGUAGE is the language of the code block and will be used as the
+`language' argument in Typst."
   (when content
-    (let ((raw (format "#raw(block: %s, %s%s)"
-                       (if block "true" "false")
-                       (if language (concat "lang: "
-                                            (org-typst--language language)
-                                            ", ")
-                         "")
-                       (org-typst--as-string content))))
-      (if block
-          (org-typst--figure raw element info)
-        raw))))
+    (let* ((attributes (org-export-read-attribute :attr_typst element))
+           (language (when raw-language (org-typst--language raw-language)))
+           ;; TODO: maybe read the tab-size set by the mapped mode in Org?
+           (tab-size (org-export-read-attribute :attr_typst element :tab-size))
+           (engrave (org-export-read-attribute :attr_typst element :engrave))
+           (theme (org-typst--attribute-file :theme attributes))
+           (syntax (org-typst--attribute-file :syntaxes attributes))
+           (theme-settings (when (and theme (not (equal theme 'none)))
+                             (org-typst--xml-theme-global-settings (org-typst--xml-read-plist theme))))
+           (raw (format "#raw(block: %s, %s)"
+                        (if block "true" "false")
+                        (concat
+                         (when tab-size (concat "tab_size: " tab-size ", "))
+                         (when language (concat "lang: "
+                                                (org-typst--as-string language)
+                                                ", "))
+                         (when theme (concat "theme: " (org-typst--as-typst-value theme) ","))
+                         (when syntax (concat "syntaxes: " (org-typst--as-typst-value syntax) ","))
+                         (org-typst--as-string content)))))
+      (if (and theme-settings org-typst-src-apply-theme-color)
+          (let* ((fg (org-typst--xml-dict-get theme-settings "foreground"))
+                 (bg (org-typst--xml-dict-get theme-settings "background"))
+                 (bg-fmt (when bg (format "#block(fill: %s, inset: 4pt)" (org-typst--as-color (org-typst--xml-as-string bg)))))
+                 (fg-fmt (when fg (format "#text(fill: %s)" (org-typst--as-color (org-typst--xml-as-string fg))))))
+            (when fg (setq raw (concat fg-fmt "[" raw "]")))
+            (when bg (setq raw (concat bg-fmt "[" raw "]")))))
+      (let* ((major-mode-of-language (org-src-get-lang-mode language))
+             (actual-code (if block
+                              (org-typst--figure raw element info)
+                            raw)))
+        (if engrave
+            (if (not major-mode-of-language)
+                (error "Language `%s` does not map to any major mode, configure `org-src-lang-modes' accordingly" language)
+              (format "#{ %s \n[%s] }" (org-typst--engrave-code content major-mode-of-language) actual-code))
+          actual-code)))))
+
+(defun org-typst--as-color (color)
+  "Convert Emacs COLOR into Typst color."
+
+  (seq-let (red green blue) (tty-color-standard-values color)
+    (format "rgb(%d, %d, %d)"
+            (/ red 256)
+            (/ green 256)
+            (/ blue 256))))
+
+(defun org-typst--plist-find (plist pred)
+  "Find a single element in PLIST which matches PRED.
+
+PRED is a function which takes the plist key and value as arguments.  If PRED
+returns t, then the key value pair is returned as a list."
+  (let ((returns nil))
+    (while (and (not returns) plist)
+      (when (funcall pred (car plist) (cadr plist))
+        (setq returns (list (car plist) (cadr plist))))
+      (setq plist (cddr plist)))
+    returns))
+
+(defun org-typst--xml-type? (xml type)
+  "Check that XML is of TYPE."
+  (equal (car xml) type))
+
+(defun org-typst--xml-dict-get (xml key)
+  "Return the KEY of an XML dictionary.
+
+The XML must be of type `dict', otherwise an error is signaled.  When the key is
+found, then the value is returned.  Otherwise, `nil' is returned."
+  (if (not (org-typst--xml-type? xml 'dict))
+      (error "Element not an XML dict")
+    (cadr (org-typst--plist-find (cddr xml) (lambda (k _)
+                                              (and (equal (car k) 'key)
+                                                   (equal (caddr k) key)))))))
+
+(defun org-typst--xml-as-string (xml)
+  "Get value for string type of XML."
+  (if (not (org-typst--xml-type? xml 'string))
+      (error "Element not an XML string")
+    (caddr xml)))
+
+(defun org-typst--xml-array-filter-type (xml type)
+  "Filter an XML array for TYPE.
+
+The resulting list only contains elements which are of type TYPE."
+  (if (not (org-typst--xml-type? xml 'array))
+      (error "Element not an XML array")
+    (seq-filter
+     (lambda (elm) (and (listp elm) (equal (car elm) type))) (cddr xml))))
+
+(defun org-typst--xml-theme-global-settings (dict)
+  "Get the global settings part of a Sublime theme stored in DICT."
+  (if (not (org-typst--xml-type? dict 'dict))
+      (error "Element not an XML dict")
+    (let* ((dicts (seq-filter (lambda (elm)
+                                (and (org-typst--xml-type? elm 'dict)
+                                     (not (org-typst--xml-dict-get elm "scope"))))
+                              (org-typst--xml-array-filter-type (org-typst--xml-dict-get dict "settings") 'dict))))
+      (if (equal (length dicts) 1)
+          (org-typst--xml-dict-get (car dicts) "settings")
+        (error "Theme was more than one global config")))))
+
+(defun org-typst--xml-read-plist (file)
+  "Parse XML FILE which must be a valid plist structure.
+
+Sublime use the plist structure to store their themes."
+  (let* ((xml (with-temp-buffer
+                (insert-file-contents file)
+                (libxml-parse-html-region))))
+    (caddr (caddr (caddr
+                   (pcase (car xml)
+                     ('html xml)
+                     ('top (car (seq-filter (lambda (elm)
+                                              (and (listp elm)
+                                                   (equal (car elm) 'html)))
+                                            xml)))))))))
+
+(defun org-typst--as-typst-value (value)
+  "Convert the Elisp VALUE into a valid Typst value."
+  (cond
+   ((equal 'none value) "none")
+   ((stringp value) (org-typst--as-string value))))
+
+(defun org-typst--attribute-file (key attributes)
+  "Interpret the element KEY of the list ATTRIBUTES as a file path.
+
+If the value is empty, then the string \"none\" is returned.  Otherwise, the
+string with the relative file path.  Notice that Typst only supports relative
+file paths, to the `TYPST_ROOT'.  Absolute paths are not supported and these
+files paths must be in the same directory as Org file or in a sub directory."
+  (when (plist-member attributes key)
+    (let ((file (plist-get attributes key)))
+      (if (string-empty-p file)
+          'none
+        file))))
 
 (defun org-typst--label (content item info)
   "Wrap ITEM and its CONTENT in a Typst label.
@@ -657,14 +891,21 @@ The resulting string will contain a \\u{XXXX} for every char specified in CHARS.
               chars
               string))
 
-(defun org-typst--as-string (string)
+(defun org-typst--as-string (string &optional no-trim)
   "Construct Typst string with content STRING.
 
-The STRING will escape every occurrence of `\"'."
+The STRING will escape every occurrence of `\"'.  Normally the STRING is
+trimmed, but can be disabled with NO-TRIM."
   (when string
-    (concat "\""
-            (org-trim (org-typst--escape '("\"") string))
-            "\"")))
+    (let* ((actual-string (cond ((stringp string) string)
+                                ((symbolp string) (symbol-name string))
+                                (t (error "Unsupported type %s of %s" (type-of string) string))))
+           (escaped (org-typst--escape '("\"") actual-string)))
+      (concat "\""
+              (if no-trim
+                  escaped
+                (org-trim escaped))
+              "\""))))
 
 (defun org-typst--language (language)
   "Map Org LANGUAGE to Typst language for source blocks.
@@ -672,11 +913,10 @@ The STRING will escape every occurrence of `\"'."
 The user can define the mapping `org-typst-language-mapping', to rename the
 languages.  If the language is not defined in the mapping, then it is
 returned.  Otherwise, the mapped language is returned."
-  (org-typst--as-string
-   (or
-    (cdr (seq-find (lambda (pl) (string-equal (car pl) language))
-                   org-typst-language-mapping))
-    language)))
+  (or
+   (cdr (seq-find (lambda (pl) (string-equal (car pl) language))
+                  org-typst-language-mapping))
+   language))
 
 (defun org-typst--timestamp (timestamp end)
   "Construct Typst timestamp from TIMESTAMP.

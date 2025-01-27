@@ -1,6 +1,9 @@
 ;; -*- lexical-binding: t -*-
 (require 'vc-git)
 
+(when (not (interactive-p))
+  (set-face-foreground 'font-lock-builtin-face "pink"))
+
 (load (file-name-concat (vc-git-root default-directory) "ox-typst.el"))
 
 ;; Required by math tests

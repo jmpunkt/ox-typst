@@ -1,0 +1,14 @@
+#+BIND: org-typst-src-apply-theme-color t
+
+* Theme With Foreground And Background
+
+This theme has a foreground and background specified. However, Typst does not
+apply these colors by default.
+
+- background should be dark
+- braces (all non keywords or constants) should be pink
+
+#+ATTR_TYPST: :theme different-theme-color.xml
+#+BEGIN_SRC c
+  if (true) {} else {}
+#+END_SRC
