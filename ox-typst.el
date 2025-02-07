@@ -128,7 +128,7 @@ to consider, and value is a regexp that will be matched against
 link's path.
 
 Note that the support for images is very limited within Typest.  See
-https://typst.app/docs/reference/visualize/image/ supprted types."
+<https://typst.app/docs/reference/visualize/image/> supported types."
   :group 'org-export-typst
   :type '(alist :key-type (string :tag "Type")
                 :value-type (regexp :tag "Path")))
@@ -136,7 +136,7 @@ https://typst.app/docs/reference/visualize/image/ supprted types."
 (defcustom org-typst-from-latex-fragment #'org-typst-from-latex-with-naive
   "Defines the way the Typst transforms LaTeX fragments into Typst code.
 
-If `nil', then the all LaTeX fragment will be ignored. Otherwise, the provided
+If nil, then the all LaTeX fragment will be ignored.  Otherwise, the provided
 function is called with a single argument, the raw LaTeX fragment as a string."
   :type 'function
   :group 'org-export-typst)
@@ -710,7 +710,7 @@ start range of the timestamp is extracted."
               day))))
 
 (defun org-typst-from-latex-with-pandoc (latex-fragment)
-  "Convert a LaTeX fragment into a Typst expression using Pandoc."
+  "Convert a LATEX-FRAGMENT into a Typst expression using Pandoc."
   (with-temp-buffer
     (insert latex-fragment)
     (call-shell-region
@@ -723,14 +723,14 @@ start range of the timestamp is extracted."
      (buffer-substring-no-properties (point-min) (point-max)))))
 
 (defun org-typst-from-latex-with-naive (latex-fragment)
-  "Convert a LaTeX fragment into Typst code.
+  "Convert a LATEX-FRAGMENT into Typst code.
 
 This approach is very naive and assumes that the provided LaTeX fragment has the
-same inner syntax as Typst. For more complex fragments, use a different
+same inner syntax as Typst.  For more complex fragments, use a different
 converter.
 
 The advantage of this convert is the availability in Emacs without additional
-dependencies. Other converts rely on external dependencies."
+dependencies.  Other converts rely on external dependencies."
   (cond
    ((string-match-p "^[ \t]*\$.*\$[ \t]*$" latex-fragment) latex-fragment)
    ((string-match-p "^[ \t]*\\\\(.*\\\\)[ \t]*$" latex-fragment)
@@ -843,7 +843,7 @@ Return PDF file's name."
   "Compile Typst file to PDF.
 
 TYPFILE is the name of the file being compiled.  The Typst command for the
-compilation is controlled by `org-typst-process'.  Output of the compilation 
+compilation is controlled by `org-typst-process'.  Output of the compilation
 process is redirected to \"*Org PDF Typst Output*\" buffer.
 
 Return PDF file name or raise an error if it couldn't be produced."
