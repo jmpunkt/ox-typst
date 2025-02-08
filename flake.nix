@@ -10,11 +10,11 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nix-emacs-ci.url = "github:purcell/nix-emacs-ci";
     "org-9-7-15" = {
-      url = "git+https://git.savannah.gnu.org/git/emacs/org-mode.git?tag=release_9.7.15";
+      url = "github:emacs-straight/org-mode?ref=release_9.7.15";
       flake = false;
     };
     "org-main" = {
-      url = "git+https://git.savannah.gnu.org/git/emacs/org-mode.git";
+      url = "github:emacs-straight/org-mode";
       flake = false;
     };
     "typst-0-12-0" = {
@@ -83,7 +83,6 @@
           if org-version == "main"
           then org-src.lastModifiedDate
           else org-version;
-        commit = org-src.rev;
 
         src = org-src;
 
