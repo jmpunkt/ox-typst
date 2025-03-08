@@ -17,12 +17,12 @@
       url = "github:emacs-straight/org-mode";
       flake = false;
     };
-    "typst-0-12-0" = {
-      url = "https://github.com/typst/typst/releases/download/v0.12.0/typst-x86_64-unknown-linux-musl.tar.xz";
+    "typst-0-13-0" = {
+      url = "https://github.com/typst/typst/releases/download/v0.13.0/typst-x86_64-unknown-linux-musl.tar.xz";
       flake = false;
     };
-    "typst-0-11-0" = {
-      url = "https://github.com/typst/typst/releases/download/v0.11.0/typst-x86_64-unknown-linux-musl.tar.xz";
+    "typst-0-12-0" = {
+      url = "https://github.com/typst/typst/releases/download/v0.12.0/typst-x86_64-unknown-linux-musl.tar.xz";
       flake = false;
     };
   };
@@ -53,8 +53,8 @@
       "release-snapshot"
     ];
     typst-versions = [
+      "0.13.0"
       "0.12.0"
-      "0.11.0"
     ];
     buildTypst = {
       pkgs,

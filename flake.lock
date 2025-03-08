@@ -382,11 +382,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1740828860,
-        "narHash": "sha256-cjbHI+zUzK5CPsQZqMhE3npTyYFt9tJ3+ohcfaOF/WM=",
+        "lastModified": 1741246872,
+        "narHash": "sha256-Q6pMP4a9ed636qilcYX8XUguvKl/0/LGXhHcRI91p0U=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "303bd8071377433a2d8f76e684ec773d70c5b642",
+        "rev": "10069ef4cf863633f57238f179a0297de84bd8d3",
         "type": "github"
       },
       "original": {
@@ -416,11 +416,11 @@
     "org-main": {
       "flake": false,
       "locked": {
-        "lastModified": 1740928457,
-        "narHash": "sha256-hW88dA0F6y4thkWkOuAKi+UmD4e9ICDJTO0HrMc/pXU=",
+        "lastModified": 1741312429,
+        "narHash": "sha256-3ZAgTGFUqr3NtGZyZVL04Ca1xk5rcvZryIgwI9FBcwI=",
         "owner": "emacs-straight",
         "repo": "org-mode",
-        "rev": "6323accc4860e739f481fd16cfbe8df5e5277458",
+        "rev": "2dc2d3e738a79d9b2c5a780e6c42d9b86549e5d6",
         "type": "github"
       },
       "original": {
@@ -435,8 +435,8 @@
         "nixpkgs": "nixpkgs_2",
         "org-9-7-15": "org-9-7-15",
         "org-main": "org-main",
-        "typst-0-11-0": "typst-0-11-0",
-        "typst-0-12-0": "typst-0-12-0"
+        "typst-0-12-0": "typst-0-12-0",
+        "typst-0-13-0": "typst-0-13-0"
       }
     },
     "systems": {
@@ -454,19 +454,6 @@
         "type": "github"
       }
     },
-    "typst-0-11-0": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1710526344,
-        "narHash": "sha256-8ir6DOhUCuL8NiebjnXCyg2zt5ust61sdBl7YAfqTyw=",
-        "type": "tarball",
-        "url": "https://github.com/typst/typst/releases/download/v0.11.0/typst-x86_64-unknown-linux-musl.tar.xz"
-      },
-      "original": {
-        "type": "tarball",
-        "url": "https://github.com/typst/typst/releases/download/v0.11.0/typst-x86_64-unknown-linux-musl.tar.xz"
-      }
-    },
     "typst-0-12-0": {
       "flake": false,
       "locked": {
@@ -478,6 +465,19 @@
       "original": {
         "type": "tarball",
         "url": "https://github.com/typst/typst/releases/download/v0.12.0/typst-x86_64-unknown-linux-musl.tar.xz"
+      }
+    },
+    "typst-0-13-0": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1739982711,
+        "narHash": "sha256-tpAtqaY4/zG319en/vbAgMgzz1r02Wh6oNKhjrL5HEk=",
+        "type": "tarball",
+        "url": "https://github.com/typst/typst/releases/download/v0.13.0/typst-x86_64-unknown-linux-musl.tar.xz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://github.com/typst/typst/releases/download/v0.13.0/typst-x86_64-unknown-linux-musl.tar.xz"
       }
     }
   },
