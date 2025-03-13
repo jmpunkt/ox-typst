@@ -1,10 +1,11 @@
-* ox-typst
+#+title: ox-typst.el - Typst Back-End for Org Export Engine
+#+language: en
 
 #+html: <a href="https://melpa.org/#/consult"><img alt="MELPA" src="https://melpa.org/packages/consult-badge.svg"/></a>
 
 Org-mode to Typst exporter.
 
-** Install
+* Install
 
 The package is available trough Melpa.
 
@@ -13,7 +14,7 @@ The package is available trough Melpa.
     :after org)
 #+END_SRC
 
-*** Recipe
+** Recipe
 
 For packages which can use recipes (e.g. Elpaca), the following snippet can be
 used.
@@ -24,12 +25,12 @@ used.
     :ensure (ox-typst :host github :repo "jmpunkt/ox-typst"))
 #+END_SRC
 
-** Usage
+* Usage
 
 If you use =org-export-dispatch=, then the Typst exporter is
 available with the =y= prefix.
 
-** Insert Typst Code
+* Insert Typst Code
 
 Typst code can be directly used within org-mode by using the
 =#+TYPST:=. The provided string is not escaped by the exporter and is
@@ -48,7 +49,7 @@ Alternatively use an export block.
 #+END_SRC
 
 
-** Themes
+* Themes
 
 Use Typst rules to change the appearance of your document. Include
 these rules at the top level of the document or above the target
@@ -61,7 +62,7 @@ and include them like below.
 
 Alternatively, rules can be put into an export block ([[*Insert Typst Code][Insert Typst Code]]).
 
-** Cite
+* Cite
 
 Typst supports citing and bibliography by default.
 
@@ -75,7 +76,7 @@ Supported styles are listed [[https://typst.app/docs/reference/model/bibliograph
 =apa=) is stringified and put into the =bibliography= function as the
 style argument (like =bibliography("./test.bib", style: "apa")=).
 
-** Math
+* Math
 
 Org-mode provides a built-in syntax for LaTeX math. However, Typst uses a
 different syntax for math. The syntax of these two modes is incompatible.
@@ -112,45 +113,45 @@ it in Org.
   (setq org-export-allow-bind-keywords t)
 #+END_SRC
 
-** Examples
+* Examples
 
 Take a look at =test/test.org= to get an idea how to use the different
 org-mode statements with Typst. For real examples look in the
 =examples= folder.
 
-*** Writing a Letter
+** Writing a Letter
 
 If you want to write a letter using a third party package
 (e.g. https://github.com/Sematre/typst-letter-pro), then take a look
 at =examples/letter.org=.
 
-*** Tests
+** Tests
 
 If you want more examples, maybe look into the tests. The tests contain small
 Org snippets and their Typst representation.
 
-** Development
+* Development
 
-*** Tests
+** Tests
 
 The tests contain small Org snippets and their Typst output. Changing the
 exporter requires to re-run the exporter on all Org files. One should manually
 check if the output matches the expectation. If the output matches the
 expectation, the newly generated files become the new golden output.
 
-**** Generate
+*** Generate
 
 #+BEGIN_SRC org
 emacs --batch -l tests/test.el -f org-typst-test-generate
 #+END_SRC
 
-**** Run
+*** Run
 
 #+BEGIN_SRC org
 emacs --batch -l tests/test.el -f org-typst-test-run
 #+END_SRC
 
-**** With Emacs
+*** With Emacs
 
 It is also possible to use these functions inside Emacs. Navigate to the
 =tests/test.el= file and run =eval-buffer=. The =ox-typst.el= file is
