@@ -1,5 +1,9 @@
 * Dollar Is Not Escaped
 
-Some inline math $x \neq y$.
+Some inline math $x != y$.
 
 Some dollar sign $.
+
+** What about some $ in the Title
+
+** Nice formula in the title $x=1$
