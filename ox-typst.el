@@ -474,7 +474,7 @@ will result in `ox-typst' to apply the colors to the code block."
     (_ nil)))
 
 (defun org-typst-plain-text (contents _info)
-  (org-typst--escape '("#") contents))
+  (org-typst--escape '("#" "$") contents))
 
 (defun org-typst-planning (_planning _contents _info)
   (message "// todo: org-typst-planning"))
