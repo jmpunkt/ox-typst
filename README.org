@@ -1,14 +1,27 @@
 * ox-typst
 
+#+html: <a href="https://melpa.org/#/consult"><img alt="MELPA" src="https://melpa.org/packages/consult-badge.svg"/></a>
+
 Org-mode to Typst exporter.
 
 ** Install
 
-*** Manual
+The package is available trough Melpa.
 
 #+BEGIN_SRC elisp
-(use-package ox-typst
-  :after org)
+  (use-package ox-typst
+    :after org)
+#+END_SRC
+
+*** Recipe
+
+For packages which can use recipes (e.g. Elpaca), the following snippet can be
+used.
+
+#+BEGIN_SRC elisp
+  (use-package ox-typst
+    :after org
+    :ensure (ox-typst :host github :repo "jmpunkt/ox-typst"))
 #+END_SRC
 
 ** Usage
