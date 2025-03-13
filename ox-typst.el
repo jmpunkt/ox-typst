@@ -403,8 +403,7 @@ will result in `ox-typst' to apply the colors to the code block."
   "#linebreak")
 
 (defun org-typst-link (link contents info)
-  (let ((link-raw (org-typst--as-string (org-element-property :raw-link link)))
-        ;; NOTE: Typst is a bit picky about labels inside headlines. If we point
+  (let (;; NOTE: Typst is a bit picky about labels inside headlines. If we point
         ;; to an element inside a headline, we need to point to the headline
         ;; instead. Most of the time this is what you want, but it might not be
         ;; correct.
@@ -438,13 +437,14 @@ will result in `ox-typst' to apply the colors to the code block."
           (format "#ref(label(%s))" link-path))))
      ;; Other like HTTP (external)
      (t
-      (format "#link(%s)%s"
-              (org-typst--as-string link-raw)
-              (if contents
-                  (format "[%s] #footnote(link(%s))"
-                          (org-trim contents)
-                          link-raw)
-                ""))))))
+      (let ((link-typst (org-typst--as-string (org-element-property :raw-link link))))
+        (format "#link(%s)%s"
+                link-typst
+                (if contents
+                    (format "[%s] #footnote(link(%s))"
+                            (org-trim contents)
+                            link-typst)
+                  "")))))))
 
 (defun org-typst-node-property (_node-property _contents _info)
   (message "// todo: org-typst-node-property"))
