@@ -108,8 +108,9 @@
         (add-to-list 'load-path ".")
       '';
     in
-      pkgs.writeShellScriptBin "emacs" ''
+      pkgs.writePureTest "emacs" ''
         export PATH="${pkgs.typst}/bin/:$PATH"
+        export PATH="${pkgs.gitMinimal}/bin/:$PATH"
         export PATH="${pkgs.pandoc}/bin/:$PATH"
         ${emacs-final}/bin/emacs -q --eval ${pkgs.lib.escapeShellArg load-path} "$@"
       '';
@@ -118,8 +119,7 @@
       pkgs,
       typst-version,
     }:
-      pkgs.writeShellScriptBin "test-typst.sh" ''
-        set -e
+      pkgs.writePureTest "test-typst.sh" ''
         export PATH="${pkgs."typst-${versionToKey typst-version}"}/bin/:$PATH"
         # for all org files in test dir
         for file in $(find tests -name "*.org"); do
@@ -165,9 +165,7 @@
           }
         };
     in
-      pkgs.writeShellScriptBin "test-elisp.sh" ''
-        set -e
-
+      pkgs.writePureTest "test-elisp.sh" ''
         echo -e "\n\n\nPackage lint"
         ${emacs}/bin/emacs -batch --eval ${pkgs.lib.escapeShellArg package-lint-setup} -f package-lint-batch-and-exit *.el
         echo -e "\n\n\nByte compile"
@@ -225,6 +223,7 @@
       import nixpkgs {
         inherit system;
         overlays = [
+          self.overlays.test
           self.overlays.typst-bin
           self.overlays.org-mode
         ];
@@ -244,6 +243,24 @@
       then (map (constructEntry set) set.value)
       else [])
     (nixpkgs.lib.attrsToList mappingSystemToTasks));
+    overlays.test = final: prev: {
+      writePureTest = name: text:
+        prev.writeTextFile {
+          inherit name;
+          executable = true;
+          destination = "/bin/${name}";
+          text = ''
+            #!/usr/bin/env -S -i ${prev.runtimeShell}
+            set -e
+            export PATH="${prev.busybox}/bin/:$PATH"
+            ${text}
+          '';
+          checkPhase = ''
+            ${prev.stdenv.shellDryRun} "$target"
+          '';
+          meta.mainProgram = name;
+        };
+    };
     overlays.typst-bin = final: prev: (prev.lib.mergeAttrsList (map (
         typst-version: {
           "typst-${versionToKey typst-version}" = buildTypst {
