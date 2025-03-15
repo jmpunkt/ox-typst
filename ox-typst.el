@@ -163,6 +163,9 @@ will result in `ox-typst' to apply the colors to the code block."
           (const :tag "Both" t))
   :group 'org-export-typst)
 
+(defvar org-typst--file-paths nil
+  "List of file paths used by the Org file.")
+
 ;; Export
 (org-export-define-backend 'typst
   '((bold . org-typst-bold)
@@ -417,7 +420,7 @@ will result in `ox-typst' to apply the colors to the code block."
      ((org-export-inline-image-p link org-typst-inline-image-rules)
       (org-typst--figure (format
                           "#image(%s)"
-                          (org-typst--as-string
+                          (org-typst--as-typst-path
                            (org-element-property
                             :path (org-export-link-localise link))))
                          link
@@ -554,6 +557,9 @@ will result in `ox-typst' to apply the colors to the code block."
                  (plist-get info :email)))
         (toc (plist-get info :with-toc)))
     (concat
+     (format "#let _ = ```typ
+exec %s
+⁠```\n" (org-typst--generate-command (plist-get info :input-file) t))
      (when (or (car title) author)
        (concat
         "#set document("
@@ -712,8 +718,8 @@ RAW-LANGUAGE is the language of the code block and will be used as the
            ;; TODO: maybe read the tab-size set by the mapped mode in Org?
            (tab-size (org-export-read-attribute :attr_typst element :tab-size))
            (engrave (org-export-read-attribute :attr_typst element :engrave))
-           (theme (org-typst--attribute-file :theme attributes))
-           (syntax (org-typst--attribute-file :syntaxes attributes))
+           (theme (org-typst--attribute-value :theme attributes))
+           (syntax (org-typst--attribute-value :syntaxes attributes))
            (theme-settings (when (and theme (not (equal theme 'none)))
                              (org-typst--xml-theme-global-settings (org-typst--xml-read-plist theme))))
            (raw (format "#raw(block: %s, %s)"
@@ -723,8 +729,8 @@ RAW-LANGUAGE is the language of the code block and will be used as the
                          (when language (concat "lang: "
                                                 (org-typst--as-string language)
                                                 ", "))
-                         (when theme (concat "theme: " (org-typst--as-typst-value theme) ","))
-                         (when syntax (concat "syntaxes: " (org-typst--as-typst-value syntax) ","))
+                         (when theme (concat "theme: " (org-typst--as-typst-path theme) ","))
+                         (when syntax (concat "syntaxes: " (org-typst--as-typst-path syntax) ","))
                          (org-typst--as-string content)))))
       (if (and theme-settings org-typst-src-apply-theme-color)
           (let* ((fg (org-typst--xml-dict-get theme-settings "foreground"))
@@ -821,24 +827,29 @@ Sublime use the plist structure to store their themes."
                                                    (equal (car elm) 'html)))
                                             xml)))))))))
 
-(defun org-typst--as-typst-value (value)
-  "Convert the Elisp VALUE into a valid Typst value."
-  (cond
-   ((equal 'none value) "none")
-   ((stringp value) (org-typst--as-string value))))
-
-(defun org-typst--attribute-file (key attributes)
-  "Interpret the element KEY of the list ATTRIBUTES as a file path.
+(defun org-typst--attribute-value (key attributes)
+  "Return value of KEY in ATTRIBUTES.
 
 If the value is empty, then the string \"none\" is returned.  Otherwise, the
-string with the relative file path.  Notice that Typst only supports relative
-file paths, to the `TYPST_ROOT'.  Absolute paths are not supported and these
-files paths must be in the same directory as Org file or in a sub directory."
+value."
   (when (plist-member attributes key)
-    (let ((file (plist-get attributes key)))
-      (if (string-empty-p file)
+    (let ((value (plist-get attributes key)))
+      (if (string-empty-p value)
           'none
-        file))))
+        value))))
+
+(defun org-typst--as-typst-path (file-path)
+  "Convert existing FILE-PATH into Typst placeholder.
+
+File paths are provided through the `--inputs' argument when compiling.  The
+returned Typst expression acts as a placeholder and will be resolved by Typst
+during compilation.  See `org-typst--common-paths' for the further details."
+  (when file-path
+    (if (equal file-path 'none)
+        "none"
+      (let ((idx (length org-typst--file-paths)))
+        (push (list (format "file-%s" idx) file-path) org-typst--file-paths)
+        (format "sys.inputs.file-%s" idx)))))
 
 (defun org-typst--label (content item info)
   "Wrap ITEM and its CONTENT in a Typst label.
@@ -949,6 +960,31 @@ start range of the timestamp is extracted."
               month
               day))))
 
+(defun org-typst--common-paths (dir)
+  "Calculate the common prefix of all used files starting from DIR.
+
+The common prefix and a list of all files with relative paths (to the prefix) is
+returned.  Files which are used by Org might be located outside of the project
+root.  We have to find the longest or common prefix of all use files.  This
+prefix will become the new project root allowing all files to be found by Typst."
+  (let* ((absolute-paths (seq-map (lambda (tuple)
+                                    (seq-let (key path) tuple
+                                      (list key (expand-file-name path))))
+                                  org-typst--file-paths))
+         (longest-prefix (seq-reduce
+                          (lambda (prefix tuple)
+                            (seq-let (_ path) tuple
+                              (fill-common-string-prefix prefix path)))
+                          absolute-paths
+                          (file-name-as-directory (expand-file-name dir)))))
+
+    (list
+     longest-prefix
+     (seq-map (lambda (tuple)
+                (seq-let (key path) tuple
+                  (list key (file-relative-name path longest-prefix))))
+              absolute-paths))))
+
 (defun org-typst-from-latex-with-pandoc (latex-fragment)
   "Convert a LATEX-FRAGMENT into a Typst expression using Pandoc."
   (with-temp-buffer
@@ -1014,6 +1050,7 @@ Export is done in a buffer named \"*Org Typst Export*\", which will be displayed
 when `org-export-show-temporary-export-buffer' is non-nil.  The resulting buffer
 will use the major mode specified by `org-typst-export-buffer-major-mode'."
   (interactive)
+  (setq org-typst--file-paths nil)
   (org-export-to-buffer 'typst org-typst-export-buffer-name
                         async subtreep visible-only body-only ext-plist
                         (when org-typst-export-buffer-major-mode
@@ -1045,6 +1082,7 @@ BODY-ONLY currently has no effect.  The entire buffer is always exported.
 EXT-PLIST, when provided, is a property list with external parameters overriding
 Org default settings, but still inferior to file-local settings."
   (interactive)
+  (setq org-typst--file-paths nil)
   (let ((outfile (org-export-output-file-name ".typ" subtreep)))
     (org-export-to-file 'typst outfile
                         async subtreep visible-only body-only ext-plist)))
@@ -1074,27 +1112,50 @@ Org default settings, but still inferior to file-local settings.
 
 Return PDF file's name."
   (interactive)
+  (setq org-typst--file-paths nil)
   (let ((outfile (org-export-output-file-name ".typ" subtreep)))
     (org-export-to-file 'typst outfile
                         async subtreep visible-only body-only ext-plist
                         #'org-typst-compile)))
 
-(defun org-typst-compile (typfile)
-  "Compile Typst file to PDF.
+(defun org-typst--generate-command (typst-file &optional no-input)
+  "Create compile command for TYPST-FILE."
+  (let* ((typst-file-absolute (expand-file-name typst-file))
+         (typst-file-dir (file-name-parent-directory typst-file-absolute))
+         (prefix-files (org-typst--common-paths typst-file-dir))
+         (typst-root-new (car prefix-files))
+         (relative-position-to-root (file-relative-name
+                                     typst-root-new typst-file-dir)))
+    (concat (format org-typst-process (if no-input "$0" typst-file-absolute))
+            (format " --root \"%s\""
+                    (if no-input
+                        (format "$(readlink -f \"$0\" | xargs dirname)/%s"
+                                relative-position-to-root)
+                      typst-root-new))
+            (apply #'concat
+                   (seq-map
+                    (lambda (tuple)
+                      (seq-let (key path) tuple
+                        (concat " --input "
+                                (shell-quote-argument
+                                 (format "%s=%s" key path)))))
+                    (cadr prefix-files))))))
 
-TYPFILE is the name of the file being compiled.  The Typst command for the
+(defun org-typst-compile (typst-file)
+  "Compile TYPST-FILE into PDF.
+
+TYPST-FILE is the name of the file being compiled.  The Typst command for the
 compilation is controlled by `org-typst-process'.  Output of the compilation
 process is redirected to \"*Org PDF Typst Output*\" buffer.
 
 Return PDF file name or raise an error if it couldn't be produced."
   (let* ((log-buf-name "*Org PDF Typst Output*")
          (log-buf (get-buffer-create log-buf-name))
-         (process (format org-typst-process typfile))
+         (process (org-typst--generate-command typst-file))
          outfile)
     (with-current-buffer log-buf
       (erase-buffer))
-
-    (setq outfile (org-compile-file typfile
+    (setq outfile (org-compile-file (expand-file-name typst-file)
                                     (list process)
                                     "pdf"
                                     (format "See %S for details" log-buf-name)

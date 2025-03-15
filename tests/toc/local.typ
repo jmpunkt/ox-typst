@@ -1,3 +1,6 @@
+#let _ = ```typ
+exec typst c "$0" --root "$(readlink -f "$0" | xargs dirname)/./"
+⁠```
 #set text(lang: "en")
 #set heading(numbering: "1.")
 #heading(level: 1)[A] #label("org0000006")
