@@ -120,6 +120,7 @@
     }:
       pkgs.writeShellScriptBin "test-typst.sh" ''
         set -e
+        export PATH="${pkgs."typst-${versionToKey typst-version}"}/bin/:$PATH"
         # for all org files in test dir
         for file in $(find tests -name "*.org"); do
           # remove extension of file and replace with typ
@@ -132,7 +133,7 @@
 
           echo "Compiling $typ_file"
           # compile the typ file
-          ${pkgs."typst-${versionToKey typst-version}"}/bin/typst c $typ_file
+          sh $typ_file
         done
       '';
 

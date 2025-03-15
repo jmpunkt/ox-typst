@@ -1,9 +1,10 @@
 * Remote Image
 
-One image should not be inlined, since Typst does not understand it. The other
-should be inlinded.
+One image should not be inlined, since Typst does not understand the file
+ending. The other should be inlined.
 
 ** Not Included
-[[file:///./black.unknown]]
+[[file:black.unknown]]
+
 ** Included
-[[file:///./black.png]]
+[[file:black.png]]
