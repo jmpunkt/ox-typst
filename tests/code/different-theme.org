@@ -1,0 +1,49 @@
+* Override Listing Theme
+** Default Without Changes
+#+BEGIN_SRC c
+  if (true) {} else {}
+#+END_SRC
+
+** Mapping (elips -> lisp)
+#+BEGIN_SRC elisp
+  (error "hmm")
+#+END_SRC
+
+** Custom Theme And Syntax
+
+- `if` and else `else` should be highlighted in blue (color of the custom theme).
+
+# Do not use hypens here, whitespaces are detected correctly, except for trainling one.
+#+ATTR_TYPST: :theme different-theme-color.xml :syntaxes different-theme-syntax.yml
+#+BEGIN_SRC cool
+  if (true) {} else {}
+#+END_SRC
+
+** Custom Theme
+
+- `if` and else `else` should be highlighted in blue (color of the custom theme).
+- `true` should be highlighted in cyan (color of the custom theme).
+
+# Do not use hypens here, whitespaces are detected correctly, except for trainling one.
+#+ATTR_TYPST: :theme different-theme-color.xml
+#+BEGIN_SRC c
+  if (true) {} else {}
+#+END_SRC
+
+** Custom Syntax File
+
+- `if` and else `else` should be highlighted in red (color of built-in theme).
+
+# Do not use hypens here, whitespaces are detected correctly, except for trainling one.
+#+ATTR_TYPST: :syntaxes different-theme-syntax.yml
+#+BEGIN_SRC cool
+  if (true) {} else {}
+#+END_SRC
+
+
+** Disable Syntax Highlighting
+
+#+ATTR_TYPST: :theme ""
+#+BEGIN_SRC c
+  if (true) {} else {}
+#+END_SRC

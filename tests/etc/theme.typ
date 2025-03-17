@@ -1,3 +1,6 @@
+#let _ = ```typ
+exec typst c "$0" --root "$(readlink -f "$0" | xargs dirname)/./"
+⁠```
 #set text(lang: "en")
 #outline()
 #set heading(numbering: "1.")
@@ -30,7 +33,6 @@
 #show heading.where(level: 3): set text(modus-themes-color-mild, weight: 700, size: 1.15em)
 
 #show outline: it => {text(modus-themes-color-baselinkfg, it)}
-#show outline: set outline(fill: none)
 #show outline.entry: it => [ #h((it.level - 1) * 1em) #it #v(0.1em, weak: true)]
 
 #show terms: it => block(above: 1.5em, it)

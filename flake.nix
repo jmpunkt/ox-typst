@@ -10,19 +10,19 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nix-emacs-ci.url = "github:purcell/nix-emacs-ci";
     "org-9-7-15" = {
-      url = "git+https://git.savannah.gnu.org/git/emacs/org-mode.git?tag=release_9.7.15";
+      url = "github:emacs-straight/org-mode?ref=release_9.7.15";
       flake = false;
     };
     "org-main" = {
-      url = "git+https://git.savannah.gnu.org/git/emacs/org-mode.git";
+      url = "github:emacs-straight/org-mode";
+      flake = false;
+    };
+    "typst-0-13-0" = {
+      url = "https://github.com/typst/typst/releases/download/v0.13.0/typst-x86_64-unknown-linux-musl.tar.xz";
       flake = false;
     };
     "typst-0-12-0" = {
       url = "https://github.com/typst/typst/releases/download/v0.12.0/typst-x86_64-unknown-linux-musl.tar.xz";
-      flake = false;
-    };
-    "typst-0-11-0" = {
-      url = "https://github.com/typst/typst/releases/download/v0.11.0/typst-x86_64-unknown-linux-musl.tar.xz";
       flake = false;
     };
   };
@@ -53,8 +53,8 @@
       "release-snapshot"
     ];
     typst-versions = [
+      "0.13.0"
       "0.12.0"
-      "0.11.0"
     ];
     buildTypst = {
       pkgs,
@@ -70,6 +70,7 @@
           install $src/typst $out/bin/
         '';
       };
+
     buildOrg = {
       writeText,
       melpaBuild,
@@ -82,7 +83,6 @@
           if org-version == "main"
           then org-src.lastModifiedDate
           else org-version;
-        commit = org-src.rev;
 
         src = org-src;
 
@@ -93,11 +93,9 @@
 
     buildPackage = {
       pkgs,
-      typst-version,
       org-version,
       emacs-version,
     }: let
-      typst-bin = pkgs."typst-${versionToKey typst-version}";
       emacs = nix-emacs-ci.packages.${pkgs.system}."emacs-${versionToKey emacs-version}";
       emacs-final = (pkgs.emacsPackagesFor emacs).emacsWithPackages (
         epkgs: [
@@ -110,14 +108,37 @@
         (add-to-list 'load-path ".")
       '';
     in
-      pkgs.writeShellScriptBin "emacs" ''
-        export PATH="${typst-bin}/bin/:$PATH"
+      pkgs.writePureTest "emacs" ''
+        export PATH="${pkgs.typst}/bin/:$PATH"
+        export PATH="${pkgs.gitMinimal}/bin/:$PATH"
+        export PATH="${pkgs.pandoc}/bin/:$PATH"
         ${emacs-final}/bin/emacs -q --eval ${pkgs.lib.escapeShellArg load-path} "$@"
       '';
 
-    buildTestCase = {
+    buildTypstTestCase = {
       pkgs,
       typst-version,
+    }:
+      pkgs.writePureTest "test-typst.sh" ''
+        export PATH="${pkgs."typst-${versionToKey typst-version}"}/bin/:$PATH"
+        # for all org files in test dir
+        for file in $(find tests -name "*.org"); do
+          # remove extension of file and replace with typ
+          typ_file=$(echo $file | sed 's/\.org$/.typ/')
+
+          if [ ! -f $typ_file ]; then
+            echo "Skipping $file"
+            continue
+          fi
+
+          echo "Compiling $typ_file"
+          # compile the typ file
+          sh $typ_file
+        done
+      '';
+
+    buildElispTestCase = {
+      pkgs,
       org-version,
       emacs-version,
     }: let
@@ -140,13 +161,11 @@
         .${pkgs.system}
         .${
           versionsToString {
-            inherit typst-version org-version emacs-version;
+            inherit org-version emacs-version;
           }
         };
     in
-      pkgs.writeShellScriptBin "test-ox-typst.sh" ''
-        set -e
-
+      pkgs.writePureTest "test-elisp.sh" ''
         echo -e "\n\n\nPackage lint"
         ${emacs}/bin/emacs -batch --eval ${pkgs.lib.escapeShellArg package-lint-setup} -f package-lint-batch-and-exit *.el
         echo -e "\n\n\nByte compile"
@@ -156,48 +175,64 @@
       '';
 
     versionsToString = {
-      typst-version,
       org-version,
       emacs-version,
-    }: "emacs-${versionToKey emacs-version}-org-${versionToKey org-version}-typst-${versionToKey typst-version}";
+    }: "emacs-${versionToKey emacs-version}-org-${versionToKey org-version}";
 
-    genMatrix = f: system: let
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = [
-          self.overlays.org-mode
-          self.overlays.typst-bin
-        ];
-      };
-    in
+    typstMatrix = pkgs:
+      builtins.foldl'
+      (a: b: a // b)
+      {}
+      (map (
+          typst-version: {
+            "typst-${versionToKey typst-version}" = buildTypstTestCase {
+              inherit typst-version pkgs;
+            };
+          }
+        )
+        typst-versions);
+
+    elispMatrix = f: pkgs:
       lib.mergeAttrsList (
         lib.mapCartesianProduct (
           {
             emacs-version,
             org-version,
-            typst-version,
           }: let
             key = versionsToString {
-              inherit typst-version org-version emacs-version;
+              inherit org-version emacs-version;
             };
           in {
             ${key} = f {
-              inherit typst-version org-version emacs-version pkgs;
+              inherit org-version emacs-version pkgs;
             };
           }
         ) {
           emacs-version = emacs-versions;
           org-version = org-versions;
-          typst-version = typst-versions;
         }
       );
+
+    testMatrix = system: let
+      pkgs = self.legacyPackages.${system};
+    in
+      (elispMatrix buildElispTestCase pkgs) // (typstMatrix pkgs);
   in {
-    checks = forAllSystems (genMatrix buildTestCase);
-    packages = forAllSystems (genMatrix buildPackage);
+    checks = forAllSystems testMatrix;
+    legacyPackages = forAllSystems (system:
+      import nixpkgs {
+        inherit system;
+        overlays = [
+          self.overlays.test
+          self.overlays.typst-bin
+          self.overlays.org-mode
+        ];
+      });
+    packages = forAllSystems (system: elispMatrix buildPackage self.legacyPackages.${system});
     githubActions = let
       mappingSystemToTasks =
         builtins.mapAttrs
-        (name: value: (builtins.attrNames value)) (forAllSystems (genMatrix buildTestCase));
+        (name: value: (builtins.attrNames value)) (forAllSystems testMatrix);
       constructEntry = set: value: {
         image = platformsToGithub.${set.name};
         system = set.name;
@@ -208,6 +243,24 @@
       then (map (constructEntry set) set.value)
       else [])
     (nixpkgs.lib.attrsToList mappingSystemToTasks));
+    overlays.test = final: prev: {
+      writePureTest = name: text:
+        prev.writeTextFile {
+          inherit name;
+          executable = true;
+          destination = "/bin/${name}";
+          text = ''
+            #!/usr/bin/env -S -i ${prev.runtimeShell}
+            set -e
+            export PATH="${prev.busybox}/bin/:$PATH"
+            ${text}
+          '';
+          checkPhase = ''
+            ${prev.stdenv.shellDryRun} "$target"
+          '';
+          meta.mainProgram = name;
+        };
+    };
     overlays.typst-bin = final: prev: (prev.lib.mergeAttrsList (map (
         typst-version: {
           "typst-${versionToKey typst-version}" = buildTypst {

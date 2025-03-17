@@ -1,0 +1,10 @@
+%YAML 1.2
+---
+name: C
+file_extensions: [cool]
+scope: source.cool
+
+contexts:
+  main:
+    - match: \b(if|else)\b
+      scope: keyword.control.cool

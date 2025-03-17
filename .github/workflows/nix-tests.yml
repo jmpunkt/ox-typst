@@ -7,10 +7,10 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     steps:
       - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v30
-
+      - uses: nixbuild/nix-quick-install-action@v29
       - name: Check Formatting
         run: |
           nix run nixpkgs#alejandra -- -c ./**/*.nix
