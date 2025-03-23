@@ -453,7 +453,7 @@ will result in `ox-typst' to apply the colors to the code block."
   (message "// todo: org-typst-node-property"))
 
 (defun org-typst-paragraph (_paragraph contents _info)
-  contents)
+  (org-typst--handle-possible-typst-fragments contents))
 
 (defun org-typst-plain-list (plain-list contents info)
   (pcase (org-element-property :type plain-list)
@@ -477,7 +477,8 @@ will result in `ox-typst' to apply the colors to the code block."
     (_ nil)))
 
 (defun org-typst-plain-text (contents _info)
-  (org-typst--escape '("#" "$") contents))
+  (org-typst--handle-possible-typst-fragments contents)
+  )
 
 (defun org-typst-planning (_planning _contents _info)
   (message "// todo: org-typst-planning"))
@@ -1186,6 +1187,44 @@ Return PDF file name or raise an error if it couldn't be produced."
 (org-cite-register-processor 'typst
                              :export-bibliography #'org-typst-export-bibliography
                              :export-citation #'org-typst-export-citation)
+
+;; HACK: poor mans org-element parser for Typst fragments
+(defun org-typst--get-preview-fragments (string)
+  (with-temp-buffer
+    (insert string)
+    (seq-map (lambda (element)
+               (let ((start (1- (car element)))
+                     (end (1- (cdr element))))
+                 (list start end (+ 2 start) (- end 2))))
+             (org-typst-preview--all-code-blocks))))
+
+(defun org-typst--handle-possible-typst-fragments (content)
+  (let ((elements (org-typst--get-preview-fragments content)))
+    (if (seq-empty-p elements)
+        content
+      (let ((result
+             (seq-reduce (lambda (acc element)
+                           (seq-let (pos result) acc
+                             (seq-let (start-outer
+                                       end-outer
+                                       start-inner
+                                       end-inner)
+                                 element
+                               (list
+                                end-outer
+                                (concat
+                                 result
+                                 (substring content pos start-outer)
+                                 "#["
+                                 (org-typst--escape
+                                  '("]" "#" "$")
+                                  (substring content start-inner end-inner))
+                                 "]")))))
+                         elements
+                         (list 0 ""))))
+        (concat
+         (cadr result)
+         (substring content (car result)))))))
 
 (provide 'ox-typst)
 ;;; ox-typst.el ends here
