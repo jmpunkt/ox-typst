@@ -1,0 +1,18 @@
+* heading level 1
+** heading level 2
+* heading level 1
+** heading level 2
+:PROPERTIES:
+:EXPORT_OPTIONS: toc:nil
+:END:
+
+Content A
+
+*** heading relative level 1
+:PROPERTIES:
+:ID:       e9971eef-08c3-40d4-ad90-a87d40cb2f59
+:END:
+
+Content B
+** heading level 2
+*** heading level 3
