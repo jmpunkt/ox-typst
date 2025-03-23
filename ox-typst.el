@@ -288,7 +288,7 @@ will result in `ox-typst' to apply the colors to the code block."
       (_ nil))))
 
 (defun org-typst-headline (headline contents info)
-  (when-let* ((level (org-element-property :level headline))
+  (when-let* ((level (org-export-get-relative-level headline info))
               (title (org-export-data (org-element-property :title headline)
                                       info))
               (label (org-typst--label nil headline info)))
