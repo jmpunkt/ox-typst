@@ -90,57 +90,85 @@
         (insert "\n"))
     (princ "\n" #'external-debugging-output)))
 
-(defun org-typst-test-run ()
-  (interactive)
+(defun org-typst-test-run-discovered-tests ()
   (let* ((base-dir (vc-git-root default-directory))
          (test-dir (concat base-dir "tests/")))
     (when (not base-dir)
       (error "Not in a git repository"))
-    (setq org-typst-test--tests-failed 0)
-    (setq org-typst-test--tests-skipped 0)
-    (setq org-typst-test--tests-succeeded 0)
-    (with-current-buffer (get-buffer-create org-typst-test--report-buffer)
-      (read-only-mode -1)
-      (erase-buffer))
-    (dolist (org-file (directory-files-recursively test-dir "\\.org$"))
-      (let* ((org-buffer (find-file-noselect org-file))
-             (typst-file (format "%s.typ" (file-name-sans-extension org-file))))
-        (let ((result-transpile
-               (if (not (file-exists-p typst-file))
-                   (list 'skip nil)
-                 (let* ((typst-new-file (format "%s.new.typ" (file-name-sans-extension org-file)))
-                        (typst-new-buffer (progn (when (get-buffer typst-new-file)
-                                                   (kill-buffer typst-new-file))
-                                                 (find-file typst-new-file)))
-                        (typst-buffer (find-file-noselect typst-file))
-                        (typst-buffer-content (with-current-buffer typst-buffer
-                                                (buffer-substring-no-properties
-                                                 (point-min)
-                                                 (point-max)))))
-                   (when (with-current-buffer typst-new-buffer)
-                     (erase-buffer))
-                   (with-current-buffer org-buffer
-                     (org-typst-export-as-typst)
-                     (with-current-buffer typst-new-buffer
-                       (insert-buffer-substring org-typst-export-buffer-name)
-                       (set-buffer-modified-p nil))
-                     (list (if (string= typst-buffer-content
-                                        (with-current-buffer org-typst-export-buffer-name
-                                          (buffer-substring-no-properties (point-min) (point-max))))
-                               'success
-                             'fail)
-                           (lambda () (diff-buffers typst-buffer typst-new-buffer))))))))
-          (org-typst-test--report org-file (list (cons "Transpile to Typst" result-transpile))))))
-    (switch-to-buffer org-typst-test--report-buffer)
-    (goto-char (point-max))
-    (insert (format "\nTests: %d\nSucceeded: %d\nSkipped: %d\nFailed: %d\n"
-                    (+ org-typst-test--tests-succeeded
-                       org-typst-test--tests-skipped
-                       org-typst-test--tests-failed)
-                    org-typst-test--tests-succeeded
-                    org-typst-test--tests-skipped
-                    org-typst-test--tests-failed))
-    (delete-other-windows)
-    (read-only-mode 1)
-    (when (> org-typst-test--tests-failed 0)
-      (error "Not all tests passed"))))
+    (dolist (org-file (directory-files-recursively
+                       test-dir
+                       "\\.org$"
+                       nil
+                       (lambda (dir)
+                         (not (string-equal "custom" (file-name-base dir))))))
+      (org-typst-export-test org-file #'org-typst-export-as-typst))))
+
+(defun org-typst-export-test (org-file export-fn)
+  (let* ((org-buffer (find-file-noselect org-file))
+         (typst-file (format "%s.typ" (file-name-sans-extension org-file))))
+    (let ((result-transpile
+           (if (not (file-exists-p typst-file))
+               (list 'skip nil)
+             (let* ((typst-new-file (format "%s.new.typ" (file-name-sans-extension org-file)))
+                    (typst-new-buffer (progn (when (get-buffer typst-new-file)
+                                               (kill-buffer typst-new-file))
+                                             (find-file typst-new-file)))
+                    (typst-buffer (find-file-noselect typst-file))
+                    (typst-buffer-content (with-current-buffer typst-buffer
+                                            (buffer-substring-no-properties
+                                             (point-min)
+                                             (point-max)))))
+               (when typst-new-buffer
+                 (with-current-buffer typst-new-buffer)
+                 (erase-buffer))
+               (with-current-buffer org-buffer
+                 ;; NOTE: When exporting subtrees, it is curial to set reset
+                 ;; the buffer position. Otherwise, the export might be
+                 ;; different across runs.
+                 (goto-char (point-min))
+                 (funcall export-fn)
+                 (with-current-buffer typst-new-buffer
+                   (insert-buffer-substring org-typst-export-buffer-name)
+                   (set-buffer-modified-p nil))
+                 (list (if (string= typst-buffer-content
+                                    (with-current-buffer org-typst-export-buffer-name
+                                      (buffer-substring-no-properties (point-min) (point-max))))
+                           'success
+                         'fail)
+                       (lambda () (diff-buffers typst-buffer typst-new-buffer))))))))
+      (org-typst-test--report org-file (list (cons "Transpile to Typst" result-transpile))))))
+
+(defun org-typst-test-run ()
+  (interactive)
+  (setq org-typst-test--tests-failed 0)
+  (setq org-typst-test--tests-skipped 0)
+  (setq org-typst-test--tests-succeeded 0)
+  (with-current-buffer (get-buffer-create org-typst-test--report-buffer)
+    (read-only-mode -1)
+    (erase-buffer))
+
+  (org-typst-test-run-discovered-tests)
+
+  ;; Custom tests:
+  ;; + TEST subtree-export.org
+  (message "%s" (concat (vc-git-root default-directory) "custom/subtree-export.org"))
+  (org-typst-export-test
+   (concat (vc-git-root default-directory) "tests/custom/subtree-export.org")
+   (lambda ()
+     ;; Goto "heading section 2" and export subtree
+     (goto-line 4)
+     (org-typst-export-as-typst nil t)))
+
+  (switch-to-buffer org-typst-test--report-buffer)
+  (goto-char (point-max))
+  (insert (format "\nTests: %d\nSucceeded: %d\nSkipped: %d\nFailed: %d\n"
+                  (+ org-typst-test--tests-succeeded
+                     org-typst-test--tests-skipped
+                     org-typst-test--tests-failed)
+                  org-typst-test--tests-succeeded
+                  org-typst-test--tests-skipped
+                  org-typst-test--tests-failed))
+  (delete-other-windows)
+  (read-only-mode 1)
+  (when (> org-typst-test--tests-failed 0)
+    (error "Not all tests passed")))
