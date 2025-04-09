@@ -6,3 +6,6 @@
 
 Here is my cite [cite:@DUMMY:1]. But here is another cite with a
 different style [cite/ieee:@OTHER].
+
+
+We can also use the two cites in a single link [cite/ieee:@OTHER;@DUMMY:1].
