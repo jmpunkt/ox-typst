@@ -112,6 +112,7 @@
         export PATH="${pkgs.typst}/bin/:$PATH"
         export PATH="${pkgs.gitMinimal}/bin/:$PATH"
         export PATH="${pkgs.pandoc}/bin/:$PATH"
+        export TERM=xterm-256color
         ${emacs-final}/bin/emacs -q --eval ${pkgs.lib.escapeShellArg load-path} "$@"
       '';
 
