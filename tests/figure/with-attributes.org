@@ -1,0 +1,6 @@
+* Figure With Attributes
+
+It is also possible to specify the Typst arguments for a figure.
+
+#+ATTR_TYPST: :width 32pt :height 32pt :alt "Black Rectangle" :fit stretch
+[[file:./black.png]]

@@ -421,16 +421,29 @@ will result in `ox-typst' to apply the colors to the code block."
            (let ((parent (org-element-parent-element target)))
              (if (string= (org-element-type parent) "headline")
                  (org-export-get-reference parent info)
-               (org-export-get-reference target info))))))
+               (org-export-get-reference target info)))))
+        (parent (org-element-parent-element link)))
     (cond
      ((org-export-inline-image-p link org-typst-inline-image-rules)
-      (org-typst--figure (format
-                          "#image(%s)"
-                          (org-typst--as-typst-path
-                           (org-element-property
-                            :path (org-export-link-localise link))))
-                         link
-                         info))
+      (org-typst--figure
+       (let ((width (org-export-read-attribute :attr_typst parent :width))
+             (height (org-export-read-attribute :attr_typst parent :height))
+             (alt (org-export-read-attribute :attr_typst parent :alt))
+             (fit (org-export-read-attribute :attr_typst parent :fit))
+             (scaling (org-export-read-attribute :attr_typst parent :scaling)))
+         (format
+          "#image(%s)"
+          (concat
+           (org-typst--as-typst-path
+            (org-element-property
+             :path (org-export-link-localise link)))
+           (when width (format ", width: %s" width))
+           (when height (format ", height: %s" height))
+           (when alt (format ", alt: %s" (org-typst--as-string alt)))
+           (when fit (format ", fit: %s" (org-typst--as-string fit)))
+           (when scaling (format ", scaling: %s" (org-typst--as-string scaling))))))
+       link
+       info))
      ((equal (org-element-property :type link) "radio")
       (when-let* ((target (org-export-resolve-radio-link link info))
                   (ref (funcall resolve-headline-friendly target)))
