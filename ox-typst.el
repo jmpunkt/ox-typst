@@ -6,7 +6,7 @@
 ;; Keywords: text, wp, org, typst
 ;; URL: https://github.com/jmpunkt/ox-typst
 ;; Package-Version: 0.1.0
-;; Package-Requires: ((emacs "29.1") (org "9.7"))
+;; Package-Requires: ((emacs "30.1") (org "9.7"))
 
 ;; This file is not part of GNU Emacs.
 

@@ -48,7 +48,7 @@
       "main"
     ];
     emacs-versions = [
-      "29.4"
+      "30.1"
       "snapshot"
       "release-snapshot"
     ];
