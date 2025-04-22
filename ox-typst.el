@@ -163,6 +163,11 @@ will result in `ox-typst' to apply the colors to the code block."
           (const :tag "Both" t))
   :group 'org-export-typst)
 
+(defcustom org-typst-default-header nil
+  "Specify the default typst content before any other content."
+  :type 'string
+  )
+
 (defvar org-typst--file-paths nil
   "List of file paths used by the Org file.")
 
@@ -223,6 +228,7 @@ will result in `ox-typst' to apply the colors to the code block."
             (?p "As PDF file" org-typst-export-to-pdf)))
   :options-alist
   '((:typst-format-drawer-function nil nil org-typst-format-drawer-function)
+    (:typst-header "TYPST_HEADER" nil org-typst-default-header newline) 
     (:typst-format-inlinetask-function nil
                                        nil
                                        org-typst-format-inlinetask-function)))
@@ -555,7 +561,8 @@ will result in `ox-typst' to apply the colors to the code block."
         (language (plist-get info :language))
         (email (when (plist-get info :with-email)
                  (plist-get info :email)))
-        (toc (plist-get info :with-toc)))
+        (toc (plist-get info :with-toc))
+        (typst-header (plist-get info :typst-header)))
     (concat
      (format "#let _ = ```typ
 exec %s
@@ -570,6 +577,7 @@ exec %s
               (format ", author: \"%s\"" (car author))))
         ")\n"))
      (when language (format "#set text(lang: \"%s\")\n" language))
+     (when typst-header (format "%s\n" typst-header))
      (when toc "#outline()\n")
      (format "#set heading(numbering: %s)\n"
              (org-typst--as-string org-typst-heading-numbering))
