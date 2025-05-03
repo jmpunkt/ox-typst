@@ -443,7 +443,8 @@ will result in `ox-typst' to apply the colors to the code block."
            (when fit (format ", fit: %s" (org-typst--as-string fit)))
            (when scaling (format ", scaling: %s" (org-typst--as-string scaling))))))
        link
-       info))
+       info
+       (org-export-read-attribute :attr_typst parent)))
      ((equal (org-element-property :type link) "radio")
       (when-let* ((target (org-export-resolve-radio-link link info))
                   (ref (funcall resolve-headline-friendly target)))
@@ -873,11 +874,11 @@ Sublime use the plist structure to store their themes."
 (defun org-typst--attribute-value (key attributes)
   "Return value of KEY in ATTRIBUTES.
 
-If the value is empty, then the string \"none\" is returned.  Otherwise, the
+If the value is empty or nil, then the `none' is returned.  Otherwise, the
 value."
   (when (plist-member attributes key)
     (let ((value (plist-get attributes key)))
-      (if (string-empty-p value)
+      (if (or (not value) (string-empty-p value))
           'none
         value))))
 
@@ -912,13 +913,17 @@ INFO is required to determine the reference of ITEM."
         (format "%s #label(%s)" (or content "") (org-typst--as-string label))
       content)))
 
-(defun org-typst--figure (content element info)
+(defun org-typst--figure (content element info &optional attributes)
   "Wrap ELEMENT and its CONTENT in a Typst figure.
 
-Retrieves the caption from the ELEMENT itself or its parent.
+Retrieves the caption from the ELEMENT itself or its parent.  If the element
+does not contain attributes, then it can be provided with ATTRIBUTES.  When
+ATTRIBUTES is nil, then the information is retrieved from the ELEMENT.
 
 INFO is required to determine the reference of ITEM."
-  (let* ((raw (or (org-export-get-caption element)
+  (let* ((attributes (or attributes (org-export-read-attribute :attr_typst element)))
+         (outlined (org-typst--attribute-value :outlined attributes))
+         (raw (or (org-export-get-caption element)
                   (org-export-get-caption (org-element-parent-element
                                            element))))
          (caption (when raw
@@ -927,9 +932,10 @@ INFO is required to determine the reference of ITEM."
                                              (org-export-data e info)))
                                raw))))
     (org-typst--label
-     (format "#figure([%s]%s)"
+     (format "#figure([%s]%s%s)"
              content
-             (if caption (format ", caption: [%s]" caption) ""))
+             (if caption (format ", caption: [%s]" caption) "")
+             (if outlined (format ", outlined: %s" (org-typst--as-bool outlined)) ""))
      element
      info)))
 
@@ -1066,7 +1072,11 @@ dependencies.  Other converts rely on external dependencies."
   "Convert VALUE into a Typst bool.
 
 This function is intended to be used with the values of attributes."
-  (if (and value (not (string-empty-p value))) "true" "false"))
+  (if (and value
+           (not (string-empty-p value))
+           (not (equal 'none value)))
+      "true"
+    "false"))
 
 ;; Commands
 (defun org-typst-export-as-typst

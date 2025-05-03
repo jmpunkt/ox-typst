@@ -10,4 +10,4 @@ exec typst c "$0" --root "$(readlink -f "$0" | xargs dirname)/./"
 but not any simpler")]) #label("org0000000")
 #heading(level: 2)[Without Attribution] #label("org0000005")
 #figure([#quote(block: true, "Everything should be made as simple as possible,
-but not any simpler --  Albert Einstein")]) #label("org0000004")
+but not any simpler --  Albert Einstein")], outlined: false) #label("org0000004")
