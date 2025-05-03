@@ -475,25 +475,47 @@ will result in `ox-typst' to apply the colors to the code block."
   contents)
 
 (defun org-typst-plain-list (plain-list contents info)
-  (pcase (org-element-property :type plain-list)
-    ;; NOTE: use a single list with a marker instead of a list with
-    ;;       list items
-    ('unordered
-     (mapconcat
-      (lambda (item)
-        (when (eq (car item) 'item)
-          (let ((marker (cdr (assoc (org-element-property :checkbox item)
-                                    org-typst-checkbox-symbols)))
-                (item-content (org-trim (org-export-data item info))))
-            (if marker
-                (format "#list(marker: [%s], list.item[%s])"
-                        marker
-                        item-content)
-              (format "#list(list.item[%s])" item-content)))))
-      (cdr plain-list)))
-    ('ordered (format "#enum(%s)" contents))
-    ('descriptive (format "#terms(%s)" contents))
-    (_ nil)))
+  (let ((tight (org-export-read-attribute :attr_typst plain-list :tight))
+        (full (org-export-read-attribute :attr_typst plain-list :full))
+        (reversed (org-export-read-attribute :attr_typst plain-list :reversed))
+        (indent (org-export-read-attribute :attr_typst plain-list :indent))
+        (body-indent (org-export-read-attribute :attr_typst plain-list :body-indent))
+        (spacing (org-export-read-attribute :attr_typst plain-list :spacing))
+        (number-align (org-export-read-attribute :attr_typst plain-list :number-align)))
+    (pcase (org-element-property :type plain-list)
+      ;; NOTE: We have to use a separate list for every item, since a list can
+      ;;       only have a single marker. However, we are allowed to change the
+      ;;       marker per item.
+      ('unordered
+       (mapconcat
+        (lambda (item)
+          (when (eq (car item) 'item)
+            (let* ((marker (cdr (assoc (org-element-property :checkbox item)
+                                       org-typst-checkbox-symbols)))
+                   (item-content (org-trim (org-export-data item info))))
+              (format "#list(%slist.item[%s])"
+                      (concat
+                       (when marker (format "marker: [%s], " marker))
+                       (when tight (format "tight: %s," (org-typst--as-bool tight)))
+                       (when indent (format "indent: %s," indent))
+                       (when body-indent (format "body-indent: %s," body-indent))
+                       (when spacing (format "spacing: %s," spacing)))
+                      item-content))))
+        (cdr plain-list)))
+      ('ordered
+       (format
+        "#enum(%s)"
+        (concat
+         (when tight (format "tight: %s, " (org-typst--as-bool tight)))
+         (when full (format "full: %s, " (org-typst--as-bool full)))
+         (when reversed (format "reversed: %s, " (org-typst--as-bool reversed)))
+         (when indent (format "indent: %s, " indent))
+         (when body-indent (format "body-indent: %s, " body-indent))
+         (when spacing (format "spacing: %s, " spacing))
+         (when number-align (format "number-align: %s, " number-align))
+         contents)))
+      ('descriptive (format "#terms(%s)" contents))
+      (_ nil))))
 
 (defun org-typst-plain-text (contents _info)
   (org-typst--escape '("#" "$") contents))
@@ -744,7 +766,7 @@ RAW-LANGUAGE is the language of the code block and will be used as the
            (theme-settings (when (and theme (not (equal theme 'none)))
                              (org-typst--xml-theme-global-settings (org-typst--xml-read-plist theme))))
            (raw (format "#raw(block: %s, %s)"
-                        (if block "true" "false")
+                        (org-typst--as-bool block)
                         (concat
                          (when tab-size (concat "tab_size: " tab-size ", "))
                          (when language (concat "lang: "
@@ -1039,6 +1061,12 @@ dependencies.  Other converts rely on external dependencies."
     (replace-regexp-in-string
      "\\\\\\][ \t]*$" "$"
      (replace-regexp-in-string "^[ \t]*\\\\\\[" "$" latex-fragment)))))
+
+(defun org-typst--as-bool (value)
+  "Convert VALUE into a Typst bool.
+
+This function is intended to be used with the values of attributes."
+  (if (and value (not (string-empty-p value))) "true" "false"))
 
 ;; Commands
 (defun org-typst-export-as-typst
