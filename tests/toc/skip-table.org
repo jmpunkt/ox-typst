@@ -1,0 +1,19 @@
+#+OPTIONS: toc:nil
+
+#+TOC: tables
+
+* A
+#+ATTR_TYPST: :outlined nil
+#+CAPTION: This is the first table
+| Name  | Phone | Age |
+|-------+-------+-----|
+| Peter |  1234 |  17 |
+| Anna  |  4321 |  25 |
+
+#+CAPTION: This is the second table
+| Name  | Phone | Age |
+|-------+-------+-----|
+| Peter |  1234 |  17 |
+| Anna  |  4321 |  25 |
+
+

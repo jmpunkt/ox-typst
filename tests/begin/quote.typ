@@ -12,4 +12,4 @@ but not any simpler
 #heading(level: 2)[Without Attribution] #label("org0000005")
 #figure([#quote(block: true)[Everything should be made as simple as possible,
 but not any simpler \u{2d}\u{2d}  Albert Einstein
-]]) #label("org0000004")
+]], outlined: false) #label("org0000004")
