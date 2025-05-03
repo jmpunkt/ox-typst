@@ -4,3 +4,11 @@
   - TwoPointOne
   - TwoPointTwo
 - Three
+
+* Plain With Attributes
+#+ATTR_TYPST: :maker t :tight t :indent 1pt :body-indent 2pt :spacing 3pt :unknwon-attribute-not-exported t
+- One
+- Two
+  - TwoPointOne
+  - TwoPointTwo
+- Three
