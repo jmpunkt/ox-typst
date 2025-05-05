@@ -1,7 +1,7 @@
 #+title: ox-typst.el - Typst Back-End for Org Export Engine
 #+language: en
 
-#+html: <a href="https://melpa.org/#/consult"><img alt="MELPA" src="https://melpa.org/packages/consult-badge.svg"/></a>
+#+html: <a href="https://melpa.org/#/ox-typst"><img alt="MELPA" src="https://melpa.org/packages/ox-typst-badge.svg"/></a>
 
 Org-mode to Typst exporter.
 
