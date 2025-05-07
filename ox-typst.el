@@ -1165,22 +1165,24 @@ Return PDF file name or raise an error if it couldn't be produced."
 
 ;; Citation Exporter
 (defun org-typst-export-bibliography (_keys files style properties _backend com)
-  (let ((dir (file-name-parent-directory (plist-get com :input-file)))
-        (title (plist-get properties :title)))
-    (format "#bibliography(%s%s(%s))"
+  (let* ((dir (file-name-parent-directory (plist-get com :input-file)))
+         (title (plist-get properties :title))
+         (rel-fs (mapcar (lambda (f) (org-typst--as-typst-path (file-relative-name f dir)))
+                         files)))
+    (format "#bibliography(%s%s\"%s\")"
             (and style (format "style: \"%s\", " style))
             (if title (format "title: %s, " (org-typst--as-string title)) "")
-            (mapconcat (lambda (f) (org-typst--as-string (file-relative-name f dir)))
+            (mapconcat #'identity
                        files
                        ", "))))
 
 (defun org-typst-export-citation (citation style _ _info)
   (let ((references (org-cite-get-references citation)))
-    (format "#cite(label(%s)%s)"
-            (mapconcat (lambda (r) (org-typst--as-string (org-element-property :key r)))
-                       references
-                       ", ")
-            (or (and (car style) (format ", style: \"%s\"" (car style)))  ""))))
+    (mapconcat (lambda (r)
+                 (format "#cite(label(%s)%s)"
+                         (org-typst--as-string (org-element-property :key r))
+                         (or (and (car style) (format ", style: \"%s\"" (car style)))  "")))
+               references)))
 
 ;; Register `typst' processor
 (org-cite-register-processor 'typst
