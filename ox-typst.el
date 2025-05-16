@@ -166,7 +166,7 @@ will result in `ox-typst' to apply the colors to the code block."
 (defcustom org-typst-default-header nil
   "Specify the default typst content before any other content."
   :type 'string
-  )
+  :group 'org-export-typst)
 
 (defvar org-typst--file-paths nil
   "List of file paths used by the Org file.")
