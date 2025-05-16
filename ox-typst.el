@@ -164,7 +164,7 @@ will result in `ox-typst' to apply the colors to the code block."
   :group 'org-export-typst)
 
 (defcustom org-typst-default-header nil
-  "Specify the default typst content before any other content."
+  "Specify the default Typst content before any other content."
   :type 'string
   :group 'org-export-typst)
 
