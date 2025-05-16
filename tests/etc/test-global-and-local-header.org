@@ -1,0 +1,2 @@
+#+BIND: org-typst-default-header "#[hello from the variable header]"
+#+TYPST_HEADER: #[defined in Org]
