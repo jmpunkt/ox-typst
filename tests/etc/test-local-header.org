@@ -1,0 +1,1 @@
+#+TYPST_HEADER: #[defined in Org]

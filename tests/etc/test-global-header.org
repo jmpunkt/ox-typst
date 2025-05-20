@@ -1,0 +1,1 @@
+#+BIND: org-typst-default-header "#[defined in the variable]"
