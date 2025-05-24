@@ -32,3 +32,14 @@ jobs:
       - uses: nixbuild/nix-quick-install-action@v29
       - name: Run Tests
         run: nix run --system ${{ matrix.system }} -L ".#checks.${{ matrix.system }}.${{ matrix.target }}"
+
+  build-done:
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    steps:
+      - name: Fail if any previous steps failed
+        if: ${{ needs.build.result == 'failure' }}
+        run: |
+          echo "One or more jobs in the matrix failed."
+          exit 1
