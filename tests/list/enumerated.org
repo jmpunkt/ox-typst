@@ -6,7 +6,7 @@
 3. Three
 
 * Enumerated With Attributes
-#+ATTR_TYPST: :tight t :full t :reversed t :indent 3pt :body-indent 2pt :spacing 1pt :number-align bottom :unknwon-attribute-not-exported t
+#+ATTR_TYPST: :tight t :full t :indent 3pt :body-indent 2pt :spacing 1pt :number-align bottom :unknwon-attribute-not-exported t
 1. One
 2. Two
    1. TwoPointOne

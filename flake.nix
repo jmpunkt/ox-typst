@@ -122,8 +122,7 @@
     }:
       pkgs.writePureTest "test-typst.sh" ''
         export PATH="${pkgs."typst-${versionToKey typst-version}"}/bin/:$PATH"
-        # for all org files in test dir
-        for file in $(find tests -name "*.org"); do
+        test_org_file() {
           # remove extension of file and replace with typ
           typ_file=$(echo $file | sed 's/\.org$/.typ/')
 
@@ -135,6 +134,16 @@
           echo "Compiling $typ_file"
           # compile the typ file
           sh $typ_file
+        }
+
+        # Compile all general test cases
+        for file in $(find tests -name "*.org" -not -path "tests/version-specific/*"); do
+          test_org_file $file
+        done
+
+        # Compile all test cases which are version specific
+        for file in $(find tests/version-specific/${lib.versions.majorMinor typst-version} -name "*.org"); do
+          test_org_file $file
         done
       '';
 
