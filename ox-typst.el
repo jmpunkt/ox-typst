@@ -499,12 +499,12 @@ will result in `ox-typst' to apply the colors to the code block."
                       :author)))
     (when contents
       (org-typst--figure
-       (format "#quote(block: true%s, %s)"
+       (format "#quote(block: true%s)[%s]"
                (if attribution
                    (format ", attribution: %s"
                            (org-typst--as-string attribution))
                  "")
-               (org-typst--as-string contents))
+               contents)
        quote-block
        info))))
 
