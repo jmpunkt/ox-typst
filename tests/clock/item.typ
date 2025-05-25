@@ -8,4 +8,4 @@ exec typst c "$0" --root "$(readlink -f "$0" | xargs dirname)/./"
 Here we have an example task with time information. Lets see how this is
 represented in Typst.
 #heading(level: 3)[Some task] #label("org0000000")
-#list(list.item[State "DONE"       from "TODO"       #datetime(year: 2020, month: 12, day: 7, hour: 2, minute: 26, second: 0).display()])
+#list(list.item[State \u{22}DONE\u{22}       from \u{22}TODO\u{22}       #datetime(year: 2020, month: 12, day: 7, hour: 2, minute: 26, second: 0).display()])
