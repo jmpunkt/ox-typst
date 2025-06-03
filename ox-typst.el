@@ -968,6 +968,15 @@ start range of the timestamp is extracted."
               month
               day))))
 
+(defun org-typst--as-cite-form (style)
+  "Convert STYLE from Emacs citation style to Typst form."
+  (pcase style
+    ("text" "prose")
+    ("author" "author")
+    ("noauthor" "date")
+    ("nocite" "none")
+    (s (warn "Citation style '%s' doesn't have an equivalent in Typst; using 'normal'." s) "normal")))
+
 (defun org-typst--common-paths (dir)
   "Calculate the common prefix of all used files starting from DIR.
 
@@ -1183,12 +1192,18 @@ Return PDF file name or raise an error if it couldn't be produced."
                        ", "))))
 
 (defun org-typst-export-citation (citation style _ _info)
-  (let ((references (org-cite-get-references citation)))
-    (format "#cite(label(%s)%s)"
-            (mapconcat (lambda (r) (org-typst--as-string (org-element-property :key r)))
-                       references
-                       ", ")
-            (or (and (car style) (format ", style: \"%s\"" (car style)))  ""))))
+  (mapconcat (lambda (r)
+               (format "#cite(label(%s)%s%s)"
+                       (org-typst--as-string (org-element-property :key r))
+                       (or (when-let* ((supplement (org-element-property :suffix r)))
+                             (format ", supplement: %s"
+                                     (org-typst--as-string (car supplement))))
+                           "")
+                       (or (and (car style)
+                                (format ", form: %s"
+                                        (org-typst--as-string (org-typst--as-cite-form (car style)))))
+                           "")))
+             (org-cite-get-references citation)))
 
 ;; Register `typst' processor
 (org-cite-register-processor 'typst
