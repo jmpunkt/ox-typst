@@ -1135,11 +1135,12 @@ Return PDF file's name."
          (relative-position-to-root (file-relative-name
                                      typst-root-new typst-file-dir)))
     (concat (format org-typst-process (if no-input "$0" typst-file-absolute))
-            (format " --root \"%s\""
-                    (if no-input
-                        (format "$(readlink -f \"$0\" | xargs dirname)/%s"
-                                relative-position-to-root)
-                      typst-root-new))
+            (unless (string-match-p "--root" org-typst-process)
+              (format " --root \"%s\""
+                      (if no-input
+                          (format "$(readlink -f \"$0\" | xargs dirname)/%s"
+                                  relative-position-to-root)
+                        typst-root-new)))
             (apply #'concat
                    (seq-map
                     (lambda (tuple)
