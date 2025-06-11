@@ -409,7 +409,7 @@ will result in `ox-typst' to apply the colors to the code block."
         "#outline(title: none, target: figure.where(kind: raw))"))))))
 
 (defun org-typst-line-break (_line-break _contents _info)
-  "#linebreak")
+  "#linebreak()\n")
 
 (defun org-typst-link (link contents info)
   (let (;; NOTE: Typst is a bit picky about labels inside headlines. If we point
