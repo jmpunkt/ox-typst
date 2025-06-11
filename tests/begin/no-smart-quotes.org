@@ -1,0 +1,17 @@
+#+OPTIONS: ':nil
+
+* No Smart Quotes
+
+When smart quotes are disabled, then the output must be escaped.
+
+"Hello World"
+
+"Hello World isn't made of quotes"
+
+'Alternative Hello World'
+
+'Alternative with a a single quote e.g. "'
+
+* Single Smart Quotes
+
+This shouldn't be a problem as well.

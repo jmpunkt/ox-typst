@@ -17,8 +17,8 @@
       url = "github:emacs-straight/org-mode";
       flake = false;
     };
-    "typst-0-13-0" = {
-      url = "https://github.com/typst/typst/releases/download/v0.13.0/typst-x86_64-unknown-linux-musl.tar.xz";
+    "typst-0-13-1" = {
+      url = "https://github.com/typst/typst/releases/download/v0.13.1/typst-x86_64-unknown-linux-musl.tar.xz";
       flake = false;
     };
     "typst-0-12-0" = {
@@ -48,12 +48,12 @@
       "main"
     ];
     emacs-versions = [
-      "29.4"
+      "30.1"
       "snapshot"
       "release-snapshot"
     ];
     typst-versions = [
-      "0.13.0"
+      "0.13.1"
       "0.12.0"
     ];
     buildTypst = {
@@ -112,6 +112,7 @@
         export PATH="${pkgs.typst}/bin/:$PATH"
         export PATH="${pkgs.gitMinimal}/bin/:$PATH"
         export PATH="${pkgs.pandoc}/bin/:$PATH"
+        export TERM=xterm-256color
         ${emacs-final}/bin/emacs -q --eval ${pkgs.lib.escapeShellArg load-path} "$@"
       '';
 

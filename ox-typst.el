@@ -6,7 +6,7 @@
 ;; Keywords: text, wp, org, typst
 ;; URL: https://github.com/jmpunkt/ox-typst
 ;; Package-Version: 0.1.0
-;; Package-Requires: ((emacs "29.1") (org "9.7"))
+;; Package-Requires: ((emacs "30.1") (org "9.7"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -482,8 +482,16 @@ will result in `ox-typst' to apply the colors to the code block."
     ('descriptive (format "#terms(%s)" contents))
     (_ nil)))
 
-(defun org-typst-plain-text (contents _info)
-  (org-typst--escape '("#" "$") contents))
+(defun org-typst-plain-text (contents info)
+  (let ((with-smart-quotes (plist-get info :with-smart-quotes))
+        (output contents))
+    (when with-smart-quotes
+      (setq output (org-export-activate-smart-quotes output :typst info contents)))
+    (org-typst--escape
+     `("#" "$" "*" "/" "@" "<" ">" "_" "`" "+" "-"
+       ,@(when (not with-smart-quotes)
+           '("\"" "'")))
+     output)))
 
 (defun org-typst-planning (_planning _contents _info)
   (message "// todo: org-typst-planning"))
@@ -499,12 +507,12 @@ will result in `ox-typst' to apply the colors to the code block."
                       :author)))
     (when contents
       (org-typst--figure
-       (format "#quote(block: true%s, %s)"
+       (format "#quote(block: true%s)[%s]"
                (if attribution
                    (format ", attribution: %s"
                            (org-typst--as-string attribution))
                  "")
-               (org-typst--as-string contents))
+               contents)
        quote-block
        info))))
 
