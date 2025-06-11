@@ -1,0 +1,7 @@
+* Linebreak
+
+This is a line break. \\
+We should also be able to have the two in a row \\
+\\
+\\
+Above there should be empty lines.
