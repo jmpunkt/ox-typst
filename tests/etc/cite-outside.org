@@ -1,11 +1,11 @@
-#+BIBLIOGRAPHY: ./cite.bib
+#+BIBLIOGRAPHY: ../link/cite.bib
 #+print_bibliography: :title "Custom Ttitle For The Bibliography"
 #+CITE_EXPORT: typst apa
 
-* Cite
+* Cite Outside
 
 Here is my cite [cite:@DUMMY:1]. But here is another cite with a
 different style [cite/ieee:@OTHER].
 
-
-We can also use the two cites in a single link [cite/ieee:@OTHER;@DUMMY:1].
+However, the bibliography is outside of the current directory, thus the project
+root.
