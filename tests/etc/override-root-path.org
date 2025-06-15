@@ -1,0 +1,7 @@
+#+BIND: org-typst-process "typst c --root .                                  %s"
+
+* Test Root
+
+When supplying =--root= inside the compile argument, then we should not try to
+find the optimal root path. Notice that the new command includes a few
+whitespaces.
