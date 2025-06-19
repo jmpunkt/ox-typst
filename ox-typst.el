@@ -922,17 +922,19 @@ The resulting string will contain a \\u{XXXX} for every char specified in CHARS.
   "Construct Typst string with content STRING.
 
 The STRING will escape every occurrence of `\"'.  Normally the STRING is
-trimmed, but can be disabled with NO-TRIM."
+trimmed, but can be disabled with NO-TRIM.  If STRING is the symbol `none', then
+the Typst value for `none' is returned."
   (when string
-    (let* ((actual-string (cond ((stringp string) string)
-                                ((symbolp string) (symbol-name string))
-                                (t (error "Unsupported type %s of %s" (type-of string) string))))
-           (escaped (org-typst--escape '("\"") actual-string)))
-      (concat "\""
-              (if no-trim
-                  escaped
-                (org-trim escaped))
-              "\""))))
+    (if (equal string 'none)        "none"
+      (let* ((actual-string (cond ((stringp string) string)
+                                  ((symbolp string) (symbol-name string))
+                                  (t (error "Unsupported type %s of %s" (type-of string) string))))
+             (escaped (org-typst--escape '("\"") actual-string)))
+        (concat "\""
+                (if no-trim
+                    escaped
+                  (org-trim escaped))
+                "\"")))))
 
 (defun org-typst--language (language)
   "Map Org LANGUAGE to Typst language for source blocks.
@@ -977,12 +979,15 @@ start range of the timestamp is extracted."
               day))))
 
 (defun org-typst--as-cite-form (style)
-  "Convert STYLE from Emacs citation style to Typst form."
+  "Convert STYLE from Emacs citation style to Typst form.
+
+Possible types are either strings which are supported by Typst or the `none'
+symbol.  See the Typst documentation for the supported values."
   (pcase style
     ("text" "prose")
     ("author" "author")
-    ("noauthor" "date")
-    ("nocite" "none")
+    ("noauthor" "year")
+    ("nocite" 'none)
     (s (warn "Citation style '%s' doesn't have an equivalent in Typst; using 'normal'." s) "normal")))
 
 (defun org-typst--common-paths (dir)
