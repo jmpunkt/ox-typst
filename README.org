@@ -113,6 +113,41 @@ it in Org.
   (setq org-export-allow-bind-keywords t)
 #+END_SRC
 
+* Attributes
+
+Some elements consume attributes from the =ATTR_TYPST= annotations and put into
+the function call. The meaning of the different attributes can be found in the
+corresponding Typst documentation.
+
+Keep in mind that some arguments allow different value types. If an argument is
+not a =string= or =bool=, then the value will not be escaped. For example,
+=12pt= is a valid expression in Typst and can be used for /spacing/. Therefore,
+the spacing attribute is not escaped and the value must be valid Typst code.
+
+Some attributes might not be available depending on your used Typst version.
+
+| Org Element    | Typst Element | Supported Attributes                                              |
+|----------------+---------------+-------------------------------------------------------------------|
+| Block (SRC)    | [[https://typst.app/docs/reference/text/raw/][Raw]]           | tab-size, engrave, theme, syntax, theme-settings                  |
+| Block (Any)    | [[https://typst.app/docs/reference/model/figure/][Figure]]        | outlined                                                          |
+| Link (Image)   | [[https://typst.app/docs/reference/visualize/image/][Image]]         | width, height, alt, fit, scaling                                  |
+| Link (Image)   | [[https://typst.app/docs/reference/visualize/image/][Figure]]        | outlined                                                          |
+| Ordered List   | [[https://typst.app/docs/reference/model/enum/][Enum]]          | tight, full, reversed, indent, body-indent, scaling, number-align |
+| Table          | [[https://typst.app/docs/reference/model/figure/][Figure]]        | outlined                                                          |
+| Unordered List | [[https://typst.app/docs/reference/model/list/][List]]          | tight, indent, body-indent, spacing                               |
+| Figure         | [[https://typst.app/docs/reference/visualize/image/][Image]]         | height, alt, fit, scaling                                         |
+
+
+** Example
+
+Here we exclude the image (which is wrapped in a figure) from the table of
+contents.
+
+#+BEGIN_SRC org
+  ,#+ATTR_TYPST: :outlined nil
+  [[file:../black.png]]
+#+END_SRC
+
 * Examples
 
 Take a look at =test/test.org= to get an idea how to use the different
