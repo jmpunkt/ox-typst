@@ -232,7 +232,7 @@ will result in `ox-typst' to apply the colors to the code block."
 		(org-open-file (org-typst-export-to-pdf nil s v b)))))))
   :options-alist
   '((:typst-format-drawer-function nil nil org-typst-format-drawer-function)
-    (:typst-header "TYPST_HEADER" nil org-typst-default-header newline) 
+    (:typst-header "TYPST_HEADER" nil org-typst-default-header newline)
     (:typst-format-inlinetask-function nil
                                        nil
                                        org-typst-format-inlinetask-function)))
