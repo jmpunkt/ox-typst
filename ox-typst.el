@@ -224,11 +224,15 @@ will result in `ox-typst' to apply the colors to the code block."
   :menu-entry
   '(?y "Export to Typst"
        ((?F "As Typst buffer" org-typst-export-as-typst)
-            (?f "As Typst file" org-typst-export-to-typst)
-            (?p "As PDF file" org-typst-export-to-pdf)))
+        (?f "As Typst file" org-typst-export-to-typst)
+        (?p "As PDF file" org-typst-export-to-pdf)
+        (?o "As PDF file and open"
+	    (lambda (a s v b)
+	      (if a (org-typst-export-to-pdf t s v b)
+		(org-open-file (org-typst-export-to-pdf nil s v b)))))))
   :options-alist
   '((:typst-format-drawer-function nil nil org-typst-format-drawer-function)
-    (:typst-header "TYPST_HEADER" nil org-typst-default-header newline) 
+    (:typst-header "TYPST_HEADER" nil org-typst-default-header newline)
     (:typst-format-inlinetask-function nil
                                        nil
                                        org-typst-format-inlinetask-function)))
