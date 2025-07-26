@@ -425,16 +425,30 @@ will result in `ox-typst' to apply the colors to the code block."
            (let ((parent (org-element-parent-element target)))
              (if (string= (org-element-type parent) "headline")
                  (org-export-get-reference parent info)
-               (org-export-get-reference target info))))))
+               (org-export-get-reference target info)))))
+        (parent (org-element-parent-element link)))
     (cond
      ((org-export-inline-image-p link org-typst-inline-image-rules)
-      (org-typst--figure (format
-                          "#image(%s)"
-                          (org-typst--as-typst-path
-                           (org-element-property
-                            :path (org-export-link-localise link))))
-                         link
-                         info))
+      (org-typst--figure
+       (let ((width (org-export-read-attribute :attr_typst parent :width))
+             (height (org-export-read-attribute :attr_typst parent :height))
+             (alt (org-export-read-attribute :attr_typst parent :alt))
+             (fit (org-export-read-attribute :attr_typst parent :fit))
+             (scaling (org-export-read-attribute :attr_typst parent :scaling)))
+         (format
+          "#image(%s)"
+          (concat
+           (org-typst--as-typst-path
+            (org-element-property
+             :path (org-export-link-localise link)))
+           (when width (format ", width: %s" width))
+           (when height (format ", height: %s" height))
+           (when alt (format ", alt: %s" (org-typst--as-string alt)))
+           (when fit (format ", fit: %s" (org-typst--as-string fit)))
+           (when scaling (format ", scaling: %s" (org-typst--as-string scaling))))))
+       link
+       info
+       (org-export-read-attribute :attr_typst parent)))
      ((equal (org-element-property :type link) "radio")
       (when-let* ((target (org-export-resolve-radio-link link info))
                   (ref (funcall resolve-headline-friendly target)))
@@ -466,25 +480,47 @@ will result in `ox-typst' to apply the colors to the code block."
   contents)
 
 (defun org-typst-plain-list (plain-list contents info)
-  (pcase (org-element-property :type plain-list)
-    ;; NOTE: use a single list with a marker instead of a list with
-    ;;       list items
-    ('unordered
-     (mapconcat
-      (lambda (item)
-        (when (eq (car item) 'item)
-          (let ((marker (cdr (assoc (org-element-property :checkbox item)
-                                    org-typst-checkbox-symbols)))
-                (item-content (org-trim (org-export-data item info))))
-            (if marker
-                (format "#list(marker: [%s], list.item[%s])"
-                        marker
-                        item-content)
-              (format "#list(list.item[%s])" item-content)))))
-      (cdr plain-list)))
-    ('ordered (format "#enum(%s)" contents))
-    ('descriptive (format "#terms(%s)" contents))
-    (_ nil)))
+  (let ((tight (org-export-read-attribute :attr_typst plain-list :tight))
+        (full (org-export-read-attribute :attr_typst plain-list :full))
+        (reversed (org-export-read-attribute :attr_typst plain-list :reversed))
+        (indent (org-export-read-attribute :attr_typst plain-list :indent))
+        (body-indent (org-export-read-attribute :attr_typst plain-list :body-indent))
+        (spacing (org-export-read-attribute :attr_typst plain-list :spacing))
+        (number-align (org-export-read-attribute :attr_typst plain-list :number-align)))
+    (pcase (org-element-property :type plain-list)
+      ;; NOTE: We have to use a separate list for every item, since a list can
+      ;;       only have a single marker. However, we are allowed to change the
+      ;;       marker per item.
+      ('unordered
+       (mapconcat
+        (lambda (item)
+          (when (eq (car item) 'item)
+            (let* ((marker (cdr (assoc (org-element-property :checkbox item)
+                                       org-typst-checkbox-symbols)))
+                   (item-content (org-trim (org-export-data item info))))
+              (format "#list(%slist.item[%s])"
+                      (concat
+                       (when marker (format "marker: [%s], " marker))
+                       (when tight (format "tight: %s," (org-typst--as-bool tight)))
+                       (when indent (format "indent: %s," indent))
+                       (when body-indent (format "body-indent: %s," body-indent))
+                       (when spacing (format "spacing: %s," spacing)))
+                      item-content))))
+        (cdr plain-list)))
+      ('ordered
+       (format
+        "#enum(%s)"
+        (concat
+         (when tight (format "tight: %s, " (org-typst--as-bool tight)))
+         (when full (format "full: %s, " (org-typst--as-bool full)))
+         (when reversed (format "reversed: %s, " (org-typst--as-bool reversed)))
+         (when indent (format "indent: %s, " indent))
+         (when body-indent (format "body-indent: %s, " body-indent))
+         (when spacing (format "spacing: %s, " spacing))
+         (when number-align (format "number-align: %s, " number-align))
+         contents)))
+      ('descriptive (format "#terms(%s)" contents))
+      (_ nil))))
 
 (defun org-typst-plain-text (contents info)
   (let ((with-smart-quotes (plist-get info :with-smart-quotes))
@@ -743,7 +779,7 @@ RAW-LANGUAGE is the language of the code block and will be used as the
            (theme-settings (when (and theme (not (equal theme 'none)))
                              (org-typst--xml-theme-global-settings (org-typst--xml-read-plist theme))))
            (raw (format "#raw(block: %s, %s)"
-                        (if block "true" "false")
+                        (org-typst--as-bool block)
                         (concat
                          (when tab-size (concat "tab_size: " tab-size ", "))
                          (when language (concat "lang: "
@@ -850,11 +886,11 @@ Sublime use the plist structure to store their themes."
 (defun org-typst--attribute-value (key attributes)
   "Return value of KEY in ATTRIBUTES.
 
-If the value is empty, then the string \"none\" is returned.  Otherwise, the
+If the value is empty or nil, then the `none' is returned.  Otherwise, the
 value."
   (when (plist-member attributes key)
     (let ((value (plist-get attributes key)))
-      (if (string-empty-p value)
+      (if (or (not value) (string-empty-p value))
           'none
         value))))
 
@@ -889,13 +925,17 @@ INFO is required to determine the reference of ITEM."
         (format "%s #label(%s)" (or content "") (org-typst--as-string label))
       content)))
 
-(defun org-typst--figure (content element info)
+(defun org-typst--figure (content element info &optional attributes)
   "Wrap ELEMENT and its CONTENT in a Typst figure.
 
-Retrieves the caption from the ELEMENT itself or its parent.
+Retrieves the caption from the ELEMENT itself or its parent.  If the element
+does not contain attributes, then it can be provided with ATTRIBUTES.  When
+ATTRIBUTES is nil, then the information is retrieved from the ELEMENT.
 
 INFO is required to determine the reference of ITEM."
-  (let* ((raw (or (org-export-get-caption element)
+  (let* ((attributes (or attributes (org-export-read-attribute :attr_typst element)))
+         (outlined (org-typst--attribute-value :outlined attributes))
+         (raw (or (org-export-get-caption element)
                   (org-export-get-caption (org-element-parent-element
                                            element))))
          (caption (when raw
@@ -904,9 +944,10 @@ INFO is required to determine the reference of ITEM."
                                              (org-export-data e info)))
                                raw))))
     (org-typst--label
-     (format "#figure([%s]%s)"
+     (format "#figure([%s]%s%s)"
              content
-             (if caption (format ", caption: [%s]" caption) ""))
+             (if caption (format ", caption: [%s]" caption) "")
+             (if outlined (format ", outlined: %s" (org-typst--as-bool outlined)) ""))
      element
      info)))
 
@@ -1052,6 +1093,16 @@ dependencies.  Other converts rely on external dependencies."
     (replace-regexp-in-string
      "\\\\\\][ \t]*$" "$"
      (replace-regexp-in-string "^[ \t]*\\\\\\[" "$" latex-fragment)))))
+
+(defun org-typst--as-bool (value)
+  "Convert VALUE into a Typst bool.
+
+This function is intended to be used with the values of attributes."
+  (if (and value
+           (not (string-empty-p value))
+           (not (equal 'none value)))
+      "true"
+    "false"))
 
 ;; Commands
 (defun org-typst-export-as-typst

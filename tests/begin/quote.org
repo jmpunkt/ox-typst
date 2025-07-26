@@ -8,6 +8,7 @@
  but not any simpler
  #+END_QUOTE
 ** Without Attribution
+ #+ATTR_TYPST: :outlined nil
  #+BEGIN_QUOTE
  Everything should be made as simple as possible,
  but not any simpler --  Albert Einstein

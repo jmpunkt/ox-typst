@@ -8,4 +8,4 @@ exec typst c "$0" --root "$(readlink -f "$0" | xargs dirname)/../" --input file-
 Normally Typst only understands file which are relative to the project root
 (called TYPST#sub[ROOT]).
 
-#figure([#image(sys.inputs.file-0)]) #label("org0000000")
+#figure([#image(sys.inputs.file-0)], outlined: false) #label("org0000000")
