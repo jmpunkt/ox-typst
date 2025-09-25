@@ -1172,8 +1172,9 @@ Return PDF file's name."
                     (lambda (tuple)
                       (seq-let (key path) tuple
                         (concat " --input "
-                                (shell-quote-argument
-                                 (format "%s=/%s" key path)))))
+                                (format "%s=/%s"
+                                        (shell-quote-argument key)
+                                        (shell-quote-argument path)))))
                     (cadr prefix-files))))))
 
 (defun org-typst-compile (typst-file)

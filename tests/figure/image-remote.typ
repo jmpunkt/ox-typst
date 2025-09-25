@@ -1,5 +1,5 @@
 #let _ = ```typ
-exec typst c "$0" --root "$(readlink -f "$0" | xargs dirname)/./" --input file-0\=/black.png
+exec typst c "$0" --root "$(readlink -f "$0" | xargs dirname)/./" --input file-0=/black.png
 ⁠```
 #set text(lang: "en")
 #outline()
