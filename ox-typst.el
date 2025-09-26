@@ -902,12 +902,15 @@ INFO is required to determine the reference of ITEM."
                     (mapconcat (lambda (e) (if (stringp e)
                                                e
                                              (org-export-data e info)))
-                               raw))))
+                               raw)))
+	 (label-element (if (string= (org-element-type element) "link")
+			    (org-element-parent-element element)
+			  element)))
     (org-typst--label
      (format "#figure([%s]%s)"
              content
              (if caption (format ", caption: [%s]" caption) ""))
-     element
+     label-element
      info)))
 
 (defun org-typst--escape (chars string)
