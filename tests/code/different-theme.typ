@@ -1,5 +1,5 @@
 #let _ = ```typ
-exec typst c "$0" --root "$(readlink -f "$0" | xargs dirname)/./" --input file-3\=/different-theme-syntax.yml --input file-2\=/different-theme-color.xml --input file-1\=/different-theme-syntax.yml --input file-0\=/different-theme-color.xml
+exec typst c "$0" --root "$(readlink -f "$0" | xargs dirname)/./" --input file-3=/different-theme-syntax.yml --input file-2=/different-theme-color.xml --input file-1=/different-theme-syntax.yml --input file-0=/different-theme-color.xml
 ⁠```
 #set text(lang: "en")
 #outline()
