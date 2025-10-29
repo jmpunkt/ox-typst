@@ -574,6 +574,7 @@ will result in `ox-typst' to apply the colors to the code block."
         (email (when (plist-get info :with-email)
                  (plist-get info :email)))
         (toc (plist-get info :with-toc))
+        (date (plist-get info :date))
         (typst-header (plist-get info :typst-header)))
     (concat
      (format "#let _ = ```typ
@@ -583,6 +584,7 @@ exec %s
        (concat
         "#set document("
         (format "title: \"%s\"" (or (car title) ""))
+        (when date (format ", date: %s" (string-trim-right (string-trim-left (org-typst-timestamp (car date) contents info) "#") ".display()")))
         (when author
           (or (when email
                 (format ", author: \"<%s> %s\"" (car author) email))
