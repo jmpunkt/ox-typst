@@ -1203,7 +1203,7 @@ Return PDF file name or raise an error if it couldn't be produced."
     outfile))
 
 ;; Citation Exporter
-(defun org-typst-export-bibliography (_keys files style properties _backend com)
+(defun org-typst-export-bibliography (_keys files style properties _backend _com)
   (let ((title (plist-get properties :title)))
     (format "#bibliography(%s%s(%s))"
             (and style (format "style: \"%s\", " style))
