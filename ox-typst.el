@@ -1205,13 +1205,12 @@ Return PDF file name or raise an error if it couldn't be produced."
     outfile))
 
 ;; Citation Exporter
-(defun org-typst-export-bibliography (_keys files style properties _backend com)
-  (let ((dir (file-name-parent-directory (plist-get com :input-file)))
-        (title (plist-get properties :title)))
+(defun org-typst-export-bibliography (_keys files style properties _backend _com)
+  (let ((title (plist-get properties :title)))
     (format "#bibliography(%s%s(%s))"
             (and style (format "style: \"%s\", " style))
             (if title (format "title: %s, " (org-typst--as-string title)) "")
-            (mapconcat (lambda (f) (org-typst--as-string (file-relative-name f dir)))
+            (mapconcat (lambda (f) (org-typst--as-typst-path f))
                        files
                        ", "))))
 
