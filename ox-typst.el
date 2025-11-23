@@ -341,7 +341,7 @@ will result in `ox-typst' to apply the colors to the code block."
 
 (defun org-typst-item (item contents info)
   (when-let* ((parent (org-export-get-parent item))
-              (trimmed (org-trim contents)))
+              (trimmed (org-trim (if (arrayp contents) contents ""))))
     (pcase (org-element-property :type parent)
       ;; NOTE: unordered list items are all represented as single lists
       ('unordered trimmed)
