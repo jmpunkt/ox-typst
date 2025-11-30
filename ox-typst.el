@@ -1059,6 +1059,7 @@ dependencies.  Other converts rely on external dependencies."
      (replace-regexp-in-string "^[ \t]*\\\\\\[" "$" latex-fragment)))))
 
 ;; Commands
+;;;###autoload
 (defun org-typst-export-as-typst
     (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer as a Typst buffer.
@@ -1098,6 +1099,7 @@ will use the major mode specified by `org-typst-export-buffer-major-mode'."
                                org-typst-export-buffer-major-mode)
                             org-typst-export-buffer-major-mode))))
 
+;;;###autoload
 (defun org-typst-export-to-typst
     (&optional async subtreep visible-only body-only ext-plist)
   "Export Org-buffer to Typst.
@@ -1126,6 +1128,7 @@ Org default settings, but still inferior to file-local settings."
     (org-export-to-file 'typst outfile
                         async subtreep visible-only body-only ext-plist)))
 
+;;;###autoload
 (defun org-typst-export-to-pdf
     (&optional async subtreep visible-only body-only ext-plist)
   "Export Org-buffer as PDF using Typst.
