@@ -11,4 +11,5 @@ enum.item(2)[Two
 enum.item(2)[TwoPointTwo],
 )],
 enum.item(3)[Three],
+enum.item(4)[],
 )
