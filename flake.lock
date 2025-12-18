@@ -363,7 +363,9 @@
         "emacs-snapshot": "emacs-snapshot",
         "flake-compat": "flake-compat",
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
         "nixpkgs-glibc-2-39": "nixpkgs-glibc-2-39"
       },
       "locked": {
@@ -382,17 +384,18 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1764557259,
-        "narHash": "sha256-fhD/QUtJ0HKs3oLvfnD+/SrBV5Y7YEkCYnDjOVUjLys=",
-        "owner": "NixOS",
+        "lastModified": 1765779637,
+        "narHash": "sha256-KJ2wa/BLSrTqDjbfyNx70ov/HdgNBCBBSQP3BIzKnv4=",
+        "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "0d70460758949966e91d9ecb823b821f963cefbb",
+        "rev": "1306659b587dc277866c7b69eb97e5f07864d8c4",
         "type": "github"
       },
       "original": {
-        "id": "nixpkgs",
-        "ref": "nixpkgs-unstable",
-        "type": "indirect"
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
       }
     },
     "nixpkgs-glibc-2-39": {
@@ -408,22 +411,6 @@
         "id": "nixpkgs",
         "rev": "647e5c14cbd5067f44ac86b74f014962df460840",
         "type": "indirect"
-      }
-    },
-    "nixpkgs_2": {
-      "locked": {
-        "lastModified": 1749285348,
-        "narHash": "sha256-frdhQvPbmDYaScPFiCnfdh3B/Vh81Uuoo0w5TkWmmjU=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "3e3afe5174c561dee0df6f2c2b2236990146329f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
       }
     },
     "org-9-7-15": {
@@ -446,11 +433,11 @@
     "org-main": {
       "flake": false,
       "locked": {
-        "lastModified": 1749490267,
-        "narHash": "sha256-n8yjSHz6z28KiusjSss0sDlXvS9WaOm5mYBd01inL/o=",
+        "lastModified": 1766012847,
+        "narHash": "sha256-QEQG9Bk2uO5dChXOkNnvQfy3+2VWYly9vCotBNIJ2OM=",
         "owner": "emacs-straight",
         "repo": "org-mode",
-        "rev": "ecde809349c31184d10167b0b822ed13a6c2ceb4",
+        "rev": "210a11ccf55076fb714a84d52ba094ab4ad40978",
         "type": "github"
       },
       "original": {
@@ -462,7 +449,7 @@
     "root": {
       "inputs": {
         "nix-emacs-ci": "nix-emacs-ci",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": "nixpkgs",
         "org-9-7-15": "org-9-7-15",
         "org-main": "org-main",
         "typst-0-12-0": "typst-0-12-0",

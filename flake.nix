@@ -8,7 +8,10 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    nix-emacs-ci.url = "github:purcell/nix-emacs-ci";
+    nix-emacs-ci = {
+      url = "github:purcell/nix-emacs-ci";
+      inputs.nixpkgs.follows = "nixpkgs";
+      };
     "org-9-7-15" = {
       url = "github:emacs-straight/org-mode?ref=release_9.7.15";
       flake = false;
