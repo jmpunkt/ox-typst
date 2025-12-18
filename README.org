@@ -87,6 +87,8 @@ syntax. By setting =org-typst-from-latex-fragment= and
 translated. For now, you have to choose between either of them. Mixing them
 throughout the document is not possible.
 
+** Typst Syntax
+
 For Typst syntax it is best to set these to =#'org-typst-from-latex-with-naive=.
 
 #+BEGIN_SRC elisp
@@ -94,16 +96,34 @@ For Typst syntax it is best to set these to =#'org-typst-from-latex-with-naive=.
         org-typst-from-latex-fragment #'org-typst-from-latex-with-naive)
 #+END_SRC
 
-When you are using the LaTeX syntax, you will need Pandoc to convert the syntax
-to Typst.
+** LaTeX Syntax
+
+For the LaTeX syntax there are different options to convert the syntax to Typst.
+
+*** Pandoc
+
+[[https://github.com/jgm/pandoc][Pandoc]] allows converting LaTeX fragments into Typst. However, this requires
+Pandoc to be installed on the system.
 
 #+BEGIN_SRC elisp
   (setq org-typst-from-latex-environment #'org-typst-from-latex-with-pandoc
         org-typst-from-latex-fragment #'org-typst-from-latex-with-pandoc)
 #+END_SRC
 
-If none of these methods work for you, then you can always provide your own
-translation functions.
+*** Mitex
+
+[[https://github.com/mitex-rs/mitex][Mitex]] allows to translate LaTeX fragment directly inside Typst.
+
+#+BEGIN_SRC elisp
+  (setq org-typst-from-latex-environment #'org-typst-from-latex-with-pandoc
+        org-typst-from-latex-fragment #'org-typst-from-latex-with-pandoc
+        org-typst-import-external-packages '(("@preview/mitex" . ("0.2.4" "*"))))
+#+END_SRC
+
+** Custom
+
+If none of the methods above work for you, then you can always provide your own
+translation function.
 
 You can also take a look at the files in =tests/math/= to get an idea on how to
 use this functionality. Notice, that in order to use =BIND= you have to enable
