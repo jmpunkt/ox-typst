@@ -1,0 +1,13 @@
+#+BIND: org-typst-from-latex-fragment org-typst-from-latex-with-mitex
+#+BIND: org-typst-from-latex-environment org-typst-from-latex-with-mitex
+#+BIND: org-typst-import-external-packages ((@preview/mitex . ("0.2.4" "*")))
+
+* Math (naive)
+
+\begin{equation}                        % arbitrary environments,
+x=\sqrt{b}                              % even tables, figures, etc
+\end{equation}
+
+This is inline Math: $a^2=b$. The following two statements are not inlined.
+
+\( a + b \) \[ a=-2 \]
