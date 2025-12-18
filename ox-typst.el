@@ -168,6 +168,28 @@ will result in `ox-typst' to apply the colors to the code block."
   :type 'string
   :group 'org-export-typst)
 
+(defcustom org-typst-import-external-packages nil
+  "List of packages imported into the Typst document.
+
+The packages specified by this variable are imported at the beginning of the
+document.
+
+For example the following specification imports the `@preview/mitex'
+package.
+
+`((\"@preview/mitex\" . (\"0.2.4\" \"*\")))'.
+
+Which results in the following import expression.
+
+`#import \"@preview/mitex:0.2.4\": *'
+
+The value of each package consists of the version (first element) and a list of
+imported items (rest elements). Using the `*' character imports all items of the
+package into the namespace."
+  :type '(alist :key-type string
+                :value-type (cons string (repeat string)))
+  :group 'org-export-typst)
+
 (defvar org-typst--file-paths nil
   "List of file paths used by the Org file.")
 
@@ -575,11 +597,21 @@ will result in `ox-typst' to apply the colors to the code block."
                  (plist-get info :email)))
         (toc (plist-get info :with-toc))
         (date (plist-get info :date))
-        (typst-header (plist-get info :typst-header)))
+        (typst-header (plist-get info :typst-header))
+        (imports (seq-map (lambda (pair)
+                            (let ((package (car pair))
+                                  (version (cadr pair))
+                                  (options (cddr pair)))
+                              (format "#import \"%s:%s\": %s\n"
+                                      package
+                                      version
+                                      (string-join options ", "))))
+                          org-typst-import-external-packages)))
     (concat
      (format "#let _ = ```typ
 exec %s
 ⁠```\n" (org-typst--generate-command (plist-get info :input-file) t))
+     (string-join imports)
      (when (or (car title) author)
        (concat
         "#set document("
@@ -1057,6 +1089,16 @@ dependencies.  Other converts rely on external dependencies."
     (replace-regexp-in-string
      "\\\\\\][ \t]*$" "$"
      (replace-regexp-in-string "^[ \t]*\\\\\\[" "$" latex-fragment)))))
+
+(defun org-typst-from-latex-with-mitex (latex-fragment)
+  "Convert a LATEX-FRAGMENT into a Typst using MiTeX.
+
+This embeds the LaTeX fragment into a MiTeX block which translates the LaTeX
+fragment into Typst during compilation.
+
+Using this function requires to add the desired Mitex package to the
+`org-typst-import-external-packages' list manually."
+  (format "#mitex(`%s`)" latex-fragment))
 
 ;; Commands
 ;;;###autoload
