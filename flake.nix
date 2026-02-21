@@ -8,13 +8,20 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    nix-emacs-ci.url = "github:purcell/nix-emacs-ci";
+    nix-emacs-ci = {
+      url = "github:purcell/nix-emacs-ci";
+      inputs.nixpkgs.follows = "nixpkgs";
+      };
     "org-9-7-15" = {
       url = "github:emacs-straight/org-mode?ref=release_9.7.15";
       flake = false;
     };
     "org-main" = {
       url = "github:emacs-straight/org-mode";
+      flake = false;
+    };
+    "typst-0-14-2" = {
+      url = "https://github.com/typst/typst/releases/download/v0.14.2/typst-x86_64-unknown-linux-musl.tar.xz";
       flake = false;
     };
     "typst-0-13-1" = {
@@ -48,11 +55,12 @@
       "main"
     ];
     emacs-versions = [
-      "30.1"
+      "30.2"
       "snapshot"
       "release-snapshot"
     ];
     typst-versions = [
+      "0.14.2"
       "0.13.1"
       "0.12.0"
     ];
