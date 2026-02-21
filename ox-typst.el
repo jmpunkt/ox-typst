@@ -560,8 +560,25 @@ will result in `ox-typst' to apply the colors to the code block."
 (defun org-typst-table-cell (_table-cell contents _info)
   (format "[%s]," (or contents "")))
 
-(defun org-typst-table-row (_table-row contents _info)
-  contents)
+(defun org-typst-table-row (table-row contents info)
+  (concat
+   (when (org-export-table-row-starts-header-p table-row info)
+     "table.header(")
+   (if (eq (org-element-property :type table-row) 'rule)
+       (if (or
+            ;; Assume general styling of tables and
+            ;; don’t write hline for:
+            ;; hline delimiting last row of header:
+            (org-export-table-row-ends-header-p
+	     (org-export-get-previous-element table-row info) info)
+            ;; hline at bottom of table:
+            (not (org-export-get-next-element table-row info)))
+           ""
+         "table.hline(),")
+     contents)
+   (when (org-export-table-row-ends-header-p table-row info)
+     "),")))
+
 
 (defun org-typst-target (target contents info)
   (org-typst--label contents target info))
