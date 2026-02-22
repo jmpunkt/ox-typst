@@ -551,7 +551,17 @@ will result in `ox-typst' to apply the colors to the code block."
     (if (eq (org-element-property :type table) 'org)
         ;;org
         (org-typst--figure
-         (format "#table(columns: %s, %s)" columns contents)
+         (format "#table(columns: %s, %s%s)"
+                 columns
+                 (concat
+                  "align: ("
+                  (mapconcat (lambda (table-cell)
+                               (format "%s" (org-export-table-cell-alignment
+		                             table-cell info)))
+                             (org-html-table-first-row-data-cells table info)
+                             ",")
+                  "),\n")
+                 contents)
          table
          info)
       ;; table.el
