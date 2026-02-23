@@ -451,13 +451,9 @@ will result in `ox-typst' to apply the colors to the code block."
      ;; Other like HTTP (external)
      (t
       (let ((link-typst (org-typst--as-string (org-element-property :raw-link link))))
-        (format "#link(%s)%s"
-                link-typst
-                (if contents
-                    (format "[%s] #footnote(link(%s))"
-                            (org-trim contents)
-                            link-typst)
-                  "")))))))
+        (if contents
+            (format "#link(%s)[%s]" link-typst (org-trim contents))
+          (format "#link(%s)" link-typst)))))))
 
 (defun org-typst-node-property (_node-property _contents _info)
   (message "// todo: org-typst-node-property"))
