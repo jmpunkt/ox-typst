@@ -163,7 +163,8 @@ will result in `ox-typst' to apply the colors to the code block."
           (const :tag "Both" t))
   :group 'org-export-typst)
 
-(defcustom org-typst-default-header nil
+(defcustom org-typst-default-header "#show link: set text(fill: blue, weight: 700)
+#show link: underline"
   "Specify the default Typst content before any other content."
   :type 'string
   :group 'org-export-typst)

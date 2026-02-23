@@ -2,6 +2,8 @@
 exec typst c "$0" --root "$(readlink -f "$0" | xargs dirname)/./" --input file-1=/cite-other.bib --input file-0=/cite.bib
 ⁠```
 #set text(lang: "en")
+#show link: set text(fill: blue, weight: 700)
+#show link: underline
 #outline()
 #set heading(numbering: "1.")
 #bibliography(style: "apa", (sys.inputs.file-0, sys.inputs.file-1))
