@@ -114,8 +114,20 @@ major-mode."
   :group 'org-export-typst)
 
 (defcustom org-typst-heading-numbering "1."
-  "Default numbering for headline used for the generated document."
-  :type 'string
+  "Default numbering for headline used for the generated document.
+
+This can be one of the following:
+  - A string: A Typst numbering pattern (e.g., \"1.\", \"1.1\", or \"(I)\").
+  - The symbol `none': Explicitly disables numbering in the Typst output.
+  - nil: No numbering command is inserted by the exporter at all,
+    allowing you to manage numbering via a custom Typst template.
+
+This setting maps to the \"#set heading(numbering: ...)\" command in Typst,
+<https://typst.app/docs/reference/model/numbering/>."
+  :type '(choice
+          (string :tag "Typst Numbering Pattern" :value "1.")
+          (const :tag "Explicitly Disable Numbering (none)" none)
+          (const :tag "No Default (Inherit from Template)" nil))
   :group 'org-export-typst)
 
 (defcustom org-typst-inline-image-rules
@@ -588,10 +600,11 @@ exec %s
               (format ", author: \"%s\"" (car author))))
         ")\n"))
      (when language (format "#set text(lang: \"%s\")\n" language))
+     (when org-typst-heading-numbering
+       (format "#set heading(numbering: %s)\n"
+               (org-typst--as-string org-typst-heading-numbering)))
      (when typst-header (format "%s\n" typst-header))
      (when toc "#outline()\n")
-     (format "#set heading(numbering: %s)\n"
-             (org-typst--as-string org-typst-heading-numbering))
      contents)))
 
 (defun org-typst-timestamp (timestamp _contents _info)
