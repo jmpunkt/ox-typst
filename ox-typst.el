@@ -131,16 +131,16 @@ This setting maps to the \"#set heading(numbering: ...)\" command in Typst,
   :group 'org-export-typst)
 
 (defcustom org-typst-inline-image-rules
-  `(("file" . ,(rx "." (or "jpeg" "jpg" "png" "svg") eos))
-    ("https" . ,(rx "." (or "jpeg" "jpg" "png" "svg") eos)))
+  `(("file" . ,(rx "." (or "jpeg" "jpg" "png" "svg" "webp" "gif" "pdf") eos))
+    ("https" . ,(rx "." (or "jpeg" "jpg" "png" "svg" "webp" "gif" "pdf") eos)))
   "Rules characterizing image files that can be inlined into Typst.
 
 A rule consists in an association whose key is the type of link
 to consider, and value is a regexp that will be matched against
 link's path.
 
-Note that the support for images is very limited within Typest.  See
-<https://typst.app/docs/reference/visualize/image/> supported types."
+Supported formats include PNG, JPEG, GIF, WebP, SVG, and PDF.
+See <https://typst.app/docs/reference/visualize/image/> for details."
   :group 'org-export-typst
   :type '(alist :key-type (string :tag "Type")
                 :value-type (regexp :tag "Path")))
