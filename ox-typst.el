@@ -119,16 +119,15 @@ major-mode."
   :group 'org-export-typst)
 
 (defcustom org-typst-inline-image-rules
-  `(("file" . ,(rx "." (or "jpeg" "jpg" "png" "svg") eos))
-    ("https" . ,(rx "." (or "jpeg" "jpg" "png" "svg") eos)))
+  `(("file" . ,(rx "." (or "jpeg" "jpg" "png" "svg" "webp" "gif") eos))
+    ("https" . ,(rx "." (or "jpeg" "jpg" "png" "svg" "webp" "gif") eos)))
   "Rules characterizing image files that can be inlined into Typst.
 
-A rule consists in an association whose key is the type of link
-to consider, and value is a regexp that will be matched against
-link's path.
+A rule consists in an association whose key is the type of link to consider, and
+value is a regexp that will be matched against link's path.
 
-Note that the support for images is very limited within Typest.  See
-<https://typst.app/docs/reference/visualize/image/> supported types."
+Supported formats are PNG, JPEG, GIF, WebP, and SVG.
+See <https://typst.app/docs/reference/visualize/image/> for details."
   :group 'org-export-typst
   :type '(alist :key-type (string :tag "Type")
                 :value-type (regexp :tag "Path")))
