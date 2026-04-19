@@ -2,6 +2,8 @@
 exec typst c "$0" --root "$(readlink -f "$0" | xargs dirname)/./" --input file-3=/different-theme-syntax.yml --input file-2=/different-theme-color.xml --input file-1=/different-theme-syntax.yml --input file-0=/different-theme-color.xml
 ⁠```
 #set text(lang: "en")
+#show link: set text(fill: blue, weight: 700)
+#show link: underline
 #outline()
 #set heading(numbering: "1.")
 #heading(level: 1)[Override Listing Theme] #label("org0000018")
