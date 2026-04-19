@@ -387,14 +387,13 @@ For unordered lists the output depends on
          ('inline-raw
           (let* ((cb-type (org-element-property :checkbox item))
                  (cb-raw (pcase cb-type
-                           ('on "[X]")
+                           ('on "[x]")
                            ('trans "[-]")
                            ('off "[ ]")
                            (_ nil))))
             (if cb-raw
                 (format "list.item[%s %s]," cb-raw trimmed)
               (format "list.item[%s]," trimmed))))
-         ;; 'marker: bare content; plain-list builds the #list() wrapper
          (_ trimmed)))
       ('ordered (when-let* ((bullet-raw (org-element-property :bullet item)))
                   (when (string-match "\\([0-9]+\\)\\." bullet-raw)
