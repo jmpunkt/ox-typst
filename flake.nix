@@ -9,8 +9,8 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nix-emacs-ci.url = "github:purcell/nix-emacs-ci";
-    "org-9-7-15" = {
-      url = "github:emacs-straight/org-mode?ref=release_9.7.15";
+    "org-9-8-3" = {
+      url = "github:emacs-straight/org-mode?ref=release_9.8.3";
       flake = false;
     };
     "org-main" = {
@@ -21,8 +21,8 @@
       url = "https://github.com/typst/typst/releases/download/v0.13.1/typst-x86_64-unknown-linux-musl.tar.xz";
       flake = false;
     };
-    "typst-0-12-0" = {
-      url = "https://github.com/typst/typst/releases/download/v0.12.0/typst-x86_64-unknown-linux-musl.tar.xz";
+    "typst-0-14-2" = {
+      url = "https://github.com/typst/typst/releases/download/v0.14.2/typst-x86_64-unknown-linux-musl.tar.xz";
       flake = false;
     };
   };
@@ -44,17 +44,17 @@
       "aarch64-darwin" = "macos-latest";
     };
     org-versions = [
-      "9.7.15"
+      "9.8.3"
       "main"
     ];
     emacs-versions = [
-      "30.1"
+      "30.2"
       "snapshot"
       "release-snapshot"
     ];
     typst-versions = [
       "0.13.1"
-      "0.12.0"
+      "0.14.2"
     ];
     buildTypst = {
       pkgs,
