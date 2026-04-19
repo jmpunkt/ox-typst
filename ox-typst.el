@@ -382,7 +382,7 @@ For unordered lists the output depends on
            (let* ((cb-type (org-element-property :checkbox item))
                   (cb-symbol (cdr (assoc cb-type org-typst-checkbox-symbols))))
              (if cb-symbol
-                 (format "list.item[%s %s]," cb-symbol trimmed)
+                 (format "list.item[%s#h(0.2em) %s]," cb-symbol trimmed)
                (format "list.item[%s]," trimmed))))
          ('inline-raw
           (let* ((cb-type (org-element-property :checkbox item))
