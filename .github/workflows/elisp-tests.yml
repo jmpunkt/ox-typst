@@ -1,6 +1,7 @@
 name: ELisp Tests
 
 on:
+  workflow_dispatch:
   push:
   pull_request:
 
