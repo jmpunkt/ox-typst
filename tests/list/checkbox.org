@@ -1,5 +1,9 @@
+#+TYPST: #import "@preview/cheq:0.3.0": checklist
+#+TYPST: #show: checklist
+
 * Checkbox
 - [ ] One
+- This is different
 - [X] Two
 - [-] Other
   - [ ] OtherOne

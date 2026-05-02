@@ -46,6 +46,30 @@ Check the documentation of your Typst version for supported arguments."
   :type 'string
   :group 'org-typst-export)
 
+(defcustom org-typst-unordered-list-checkbox-rendering 'inline
+  "How checkboxes in unordered lists are rendered.
+
+  `inline' (default) All items are emitted as a single #list()
+    block. Checkboxes are rendered using the Typst code defined in
+    `org-typst-checkbox-symbols' and prepended to each item's content.
+
+  `inline-plain' Like `inline', but checkboxes are emitted as simple text
+    markers ([X], [-], [ ]). This is ideal for Typst packages like \"cheq\"
+    which scan the document's plain text for these specific patterns.
+
+  `inline-raw' Like `inline', but checkboxes are wrapped in Typst's #raw()
+    function. This ensures they are rendered in monospace, equivalent to
+    using backticks in Typst.
+
+  `marker' Each item is wrapped in its own #list() call and the checkbox symbol
+    from `org-typst-checkbox-symbols' is passed via Typst's marker
+    attribute. Vertical spacing between items may appear excessive."
+  :group 'org-export-typst
+  :type '(choice (const :tag "Inline – custom symbols" inline)
+                 (const :tag "Inline – plain text" inline-plain)
+                 (const :tag "Inline – #raw() (monospace)" inline-raw)
+                 (const :tag "Marker – separate #list() calls" marker)))
+
 ;; TODO: Maybe use a different way to display checkboxes. Unicode most
 ;; likely wont work since there are no three checkbox like symbols
 ;; which share the same size.
@@ -340,16 +364,55 @@ will result in `ox-typst' to apply the colors to the code block."
   (format "#emph[%s]" contents))
 
 (defun org-typst-item (item contents info)
+  "Transcode an ITEM element from Org to Typst.
+CONTENTS holds the transcoded item content.  INFO is a plist with
+contextual information.
+
+For unordered lists the output depends on
+`org-typst-unordered-list-checkbox-rendering':
+- `inline': emits a list.item[] with the checkbox symbol from
+  `org-typst-checkbox-symbols' prepended to the content.
+- `inline-plain': like `inline', but uses plain text ([X], [-], [ ]).
+- `inline-raw': like `inline', but uses plain text ([X], [-], [ ]) wrapped into
+  #raw to make it be monospaced.
+- `marker': returns bare content only; the enclosing #list() wrapper
+  with the marker attribute is built by `org-typst-plain-list'."
   (when-let* ((parent (org-export-get-parent item))
               (trimmed (org-trim (if (stringp contents) contents ""))))
     (pcase (org-element-property :type parent)
-      ;; NOTE: unordered list items are all represented as single lists
-      ('unordered trimmed)
+      ('unordered
+       (pcase org-typst-unordered-list-checkbox-rendering
+         ('inline
+           (let* ((cb-type (org-element-property :checkbox item))
+                  (cb-symbol (cdr (assoc cb-type org-typst-checkbox-symbols))))
+             (if cb-symbol
+                 (format "list.item[%s#h(0.2em) %s]," cb-symbol trimmed)
+               (format "list.item[%s]," trimmed))))
+         ('inline-raw
+          (let* ((cb-type (org-element-property :checkbox item))
+                 (cb-raw (pcase cb-type
+                           ('on "#raw(\"[x]\")" )
+                           ('trans "#raw(\"[-]\")" )
+                           ('off "#raw(\"[ ]\")" )
+                           (_ nil))))
+            (if cb-raw
+                (format "list.item[%s %s]," cb-raw trimmed)
+              (format "list.item[%s]," trimmed))))
+         ('inline-plain
+          (let* ((cb-type (org-element-property :checkbox item))
+                 (cb-plain (pcase cb-type
+                             ('on "[x]" )
+                             ('trans "[-]" )
+                             ('off "[ ]" )
+                             (_ nil))))
+            (if cb-plain
+                (format "list.item[%s %s]," cb-plain trimmed)
+              (format "list.item[%s]," trimmed))))
+         (_ trimmed)))
       ('ordered (when-let* ((bullet-raw (org-element-property :bullet item)))
-                  (when (string-match "\\([0-9]+\\)\." bullet-raw)
+                  (when (string-match "\\([0-9]+\\)\\." bullet-raw)
                     (format "enum.item(%s)[%s],"
-                            (match-string 1 bullet-raw)
-                            trimmed))))
+                            (match-string 1 bullet-raw) trimmed))))
       ('descriptive (when-let* ((raw-tag (org-element-property :tag item))
                                 (tag (and raw-tag
                                           (org-export-data raw-tag info))))
@@ -462,25 +525,37 @@ will result in `ox-typst' to apply the colors to the code block."
   contents)
 
 (defun org-typst-plain-list (plain-list contents info)
+  "Transcode a PLAIN-LIST element from Org to Typst.
+CONTENTS holds the transcoded list items.  INFO is a plist with
+contextual information.
+
+Unordered lists are handled according to
+`org-typst-unordered-list-checkbox-rendering': `inline', `inline-plain' and
+`inline-raw' emit a single #list() block; `marker' wraps each item in its own
+#list() call."
   (pcase (org-element-property :type plain-list)
-    ;; NOTE: use a single list with a marker instead of a list with
-    ;;       list items
     ('unordered
-     (mapconcat
-      (lambda (item)
-        (when (eq (car item) 'item)
-          (let ((marker (cdr (assoc (org-element-property :checkbox item)
-                                    org-typst-checkbox-symbols)))
-                (item-content (org-trim (org-export-data item info))))
-            (if marker
-                (format "#list(marker: [%s], list.item[%s])"
-                        marker
-                        item-content)
-              (format "#list(list.item[%s])" item-content)))))
-      (cdr plain-list)))
+     (if (not (eq org-typst-unordered-list-checkbox-rendering 'marker))
+         (format "#list(\n%s\n)"
+                 (mapconcat (lambda (item)
+                              (org-export-data item info))
+                            (org-element-contents plain-list)
+                            "\n"))
+       (mapconcat
+        (lambda (item)
+          (when (eq (car item) 'item)
+            (let ((marker (cdr (assoc (org-element-property :checkbox item)
+                                      org-typst-checkbox-symbols)))
+                  (item-content (org-trim (org-export-data item info))))
+              (if marker
+                  (format "#list(marker: [%s], list.item[%s])"
+                          marker item-content)
+                (format "#list(list.item[%s])" item-content)))))
+        (cdr plain-list))))
     ('ordered (format "#enum(%s)" contents))
     ('descriptive (format "#terms(%s)" contents))
     (_ nil)))
+
 
 (defun org-typst-plain-text (contents info)
   (let ((with-smart-quotes (plist-get info :with-smart-quotes))
