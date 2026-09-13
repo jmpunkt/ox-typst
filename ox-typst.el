@@ -589,8 +589,9 @@ exec %s
      (when language (format "#set text(lang: \"%s\")\n" language))
      (when typst-header (format "%s\n" typst-header))
      (when toc "#outline()\n")
-     (format "#set heading(numbering: %s)\n"
-             (org-typst--as-string org-typst-heading-numbering))
+     (when (plist-get info :section-numbers)
+       (format "#set heading(numbering: %s)\n"
+               (org-typst--as-string org-typst-heading-numbering)))
      contents)))
 
 (defun org-typst-timestamp (timestamp _contents _info)
