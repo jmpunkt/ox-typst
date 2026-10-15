@@ -1006,12 +1006,13 @@ prefix will become the new project root allowing all files to be found by Typst.
                                     (seq-let (key path) tuple
                                       (list key (expand-file-name path))))
                                   org-typst--file-paths))
-         (longest-prefix (seq-reduce
-                          (lambda (prefix tuple)
-                            (seq-let (_ path) tuple
-                              (fill-common-string-prefix prefix path)))
-                          absolute-paths
-                          (file-name-as-directory (expand-file-name dir)))))
+         (longest-prefix (file-name-directory
+                          (seq-reduce
+                           (lambda (prefix tuple)
+                             (seq-let (_ path) tuple
+                               (fill-common-string-prefix prefix path)))
+                           absolute-paths
+                           (file-name-as-directory (expand-file-name dir))))))
 
     (list
      longest-prefix
