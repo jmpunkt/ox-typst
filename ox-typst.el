@@ -989,10 +989,10 @@ start range of the timestamp is extracted."
 Possible types are either strings which are supported by Typst or the `none'
 symbol.  See the Typst documentation for the supported values."
   (pcase style
-    ("text" "prose")
-    ("author" "author")
-    ("noauthor" "year")
-    ("nocite" 'none)
+    ((or "text" "t") "prose")
+    ((or "author" "a") "author")
+    ((or "noauthor" "na" "year" "y") "year")
+    ((or "nocite" "n") 'none)
     (s (warn "Citation style '%s' doesn't have an equivalent in Typst; using 'normal'." s) "normal")))
 
 (defun org-typst--common-paths (dir)
@@ -1214,23 +1214,37 @@ Return PDF file name or raise an error if it couldn't be produced."
                        ", "))))
 
 (defun org-typst-export-citation (citation style _ _info)
-  (mapconcat (lambda (r)
-               (format "#cite(label(%s)%s%s)"
-                       (org-typst--as-string (org-element-property :key r))
-                       (or (when-let* ((supplement (org-element-property :suffix r)))
-                             (format ", supplement: %s"
-                                     (org-typst--as-string (car supplement))))
-                           "")
-                       (or (and (car style)
-                                (format ", form: %s"
-                                        (org-typst--as-string (org-typst--as-cite-form (car style)))))
-                           "")))
-             (org-cite-get-references citation)))
+  (let* ((main-style (car style))
+         (variant (if (listp (cdr style)) (cadr style) (cdr style)))
+         (output
+          (mapconcat (lambda (r)
+                       (format "#cite(label(%s)%s%s)"
+                               (org-typst--as-string (org-element-property :key r))
+                               (or (when-let* ((supplement (org-element-property :suffix r)))
+                                     (format ", supplement: %s"
+                                             (org-typst--as-string (car supplement))))
+                                   "")
+                               (or (and main-style
+                                        (format ", form: %s"
+                                                (org-typst--as-string (org-typst--as-cite-form main-style))))
+                                   "")))
+                     (org-cite-get-references citation))))
+    (if (and (member main-style '("noauthor" "na" "year" "y"))
+             (not (member variant '("b" "bare" "bc" "bare-caps"))))
+        (format "(%s)" output)
+      output)))
 
 ;; Register `typst' processor
 (org-cite-register-processor 'typst
-                             :export-bibliography #'org-typst-export-bibliography
-                             :export-citation #'org-typst-export-citation)
+  :export-bibliography #'org-typst-export-bibliography
+  :export-citation #'org-typst-export-citation
+  :cite-styles
+  '((("author" "a"))
+    (("noauthor" "na") ("bare" "b"))
+    (("year" "y") ("bare" "b"))
+    (("text" "t"))
+    (("nocite" "n"))
+    (("nil"))))
 
 (provide 'ox-typst)
 ;;; ox-typst.el ends here
