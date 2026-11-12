@@ -18,5 +18,7 @@ We map the style of Emacs to Typst:
 - [cite/text:@OTHER]
 - [cite/author:@OTHER]
 - [cite/noauthor:@OTHER]
+- [cite/noauthor/bare:@OTHER]
+- [cite/na/b:@OTHER]
 - [cite/nocite:@OTHER]
 - [cite/thistextdoesnotmakeanysense:@OTHER]
