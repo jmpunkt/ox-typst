@@ -304,7 +304,9 @@ will result in `ox-typst' to apply the colors to the code block."
               (label (org-typst--label nil headline info)))
     (concat
      (format "#heading(level: %s%s)"
-             level
+             ;; typst rejects level 0 ("number must be positive"); it is what a
+             ;; generated section (the footnotes block) asks for.
+             (max 1 level)
              (if (or (org-export-excluded-from-toc-p headline info)
                      (not (org-export-numbered-headline-p headline info)))
                  ", outlined: false, numbering: none"
@@ -488,7 +490,9 @@ will result in `ox-typst' to apply the colors to the code block."
     (when with-smart-quotes
       (setq output (org-export-activate-smart-quotes output :typst info contents)))
     (org-typst--escape
-     `("#" "$" "*" "/" "@" "<" ">" "_" "`" "+" "-"
+     ;; Backslash first: it is what escapes everything else, and the later
+     ;; replacements insert backslashes of their own.
+     `("\\" "#" "$" "*" "/" "@" "<" ">" "_" "`" "+" "-" "[" "]"
        ,@(when (not with-smart-quotes)
            '("\"" "'")))
      output)))
@@ -562,6 +566,15 @@ will result in `ox-typst' to apply the colors to the code block."
 (defun org-typst-target (target contents info)
   (org-typst--label contents target info))
 
+(defconst org-typst-rtl-languages '("he" "ar" "fa" "ur" "yi" "dv" "ps")
+  "Org Babel langs that Typst must set as explicit right-to-left.
+
+Typst detects direction from the first strong character, so a Hebrew body
+paragraph is already right-aligned.  But a numbered heading begins with a Latin
+digit, which reads left-to-right and drags the whole line to the left margin.
+Setting `dir' explicitly lets a heading render right-aligned in a Hebrew
+document.")
+
 (defun org-typst-template (contents info)
   (let ((title (plist-get info :title))
         (author (when (plist-get info :with-author)
@@ -586,7 +599,9 @@ exec %s
                 (format ", author: \"<%s> %s\"" (car author) email))
               (format ", author: \"%s\"" (car author))))
         ")\n"))
-     (when language (format "#set text(lang: \"%s\")\n" language))
+     (when language (format "#set text(lang: \"%s\"%s)\n"
+             language
+             (if (member language org-typst-rtl-languages) ", dir: rtl" "")))
      (when typst-header (format "%s\n" typst-header))
      (when toc "#outline()\n")
      (format "#set heading(numbering: %s)\n"

@@ -1,0 +1,11 @@
+** Headings Below Level One
+
+Text with a footnote[fn:1].
+
+** Second
+
+More text.
+
+* Footnotes
+
+[fn:1] A plain footnote.

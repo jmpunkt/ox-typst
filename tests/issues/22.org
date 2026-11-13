@@ -1,0 +1,6 @@
+** Brackets Are Escaped
+
+Text with a bracket [1] and a lone ] and a lone [.
+
+- An item with [brackets] inside
+- An item with a lone ]
