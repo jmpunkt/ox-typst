@@ -304,7 +304,9 @@ will result in `ox-typst' to apply the colors to the code block."
               (label (org-typst--label nil headline info)))
     (concat
      (format "#heading(level: %s%s)"
-             level
+             ;; typst rejects level 0 ("number must be positive"); it is what a
+             ;; generated section (the footnotes block) asks for.
+             (max 1 level)
              (if (or (org-export-excluded-from-toc-p headline info)
                      (not (org-export-numbered-headline-p headline info)))
                  ", outlined: false, numbering: none"
@@ -488,7 +490,9 @@ will result in `ox-typst' to apply the colors to the code block."
     (when with-smart-quotes
       (setq output (org-export-activate-smart-quotes output :typst info contents)))
     (org-typst--escape
-     `("#" "$" "*" "/" "@" "<" ">" "_" "`" "+" "-"
+     ;; Backslash first: it is what escapes everything else, and the later
+     ;; replacements insert backslashes of their own.
+     `("\\" "#" "$" "*" "/" "@" "<" ">" "_" "`" "+" "-" "[" "]"
        ,@(when (not with-smart-quotes)
            '("\"" "'")))
      output)))

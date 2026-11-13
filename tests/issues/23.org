@@ -1,0 +1,7 @@
+** Trailing Backslash
+
+A line that ends with a backslash \
+and the next line follows.
+
+1. First item ending with a backslash \
+2. Second item
